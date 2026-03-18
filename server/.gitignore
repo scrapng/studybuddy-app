@@ -1,0 +1,2 @@
+# Backend API key - NEVER commit this file
+server/.env

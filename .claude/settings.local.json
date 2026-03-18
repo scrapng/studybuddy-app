@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la \"C:\\\\Users\\\\tomek\\\\.claude\\\\projects\\\\C--Users-tomek-Pictures-KODOWANIE-Claude-studyBuddy\\\\memory\"\" 2>/dev/null || echo \"Memory directory not found \")",
+      "Bash(npm create vite@latest . -- --template react-ts)",
+      "Bash(npx create-vite@latest temp-scaffold --template react-ts)",
+      "Bash(npm install)",
+      "Bash(npm install tailwindcss @tailwindcss/vite react-router-dom date-fns lucide-react recharts)",
+      "Bash(npm install -D @types/node)",
+      "Bash(npx shadcn@latest init -d -y)",
+      "Bash(npx shadcn@latest add card dialog input label select textarea badge tabs dropdown-menu sheet progress separator switch tooltip sonner -y)",
+      "Bash(npx shadcn@latest add card dialog input label select textarea badge tabs dropdown-menu sheet progress separator switch tooltip sonner -y --overwrite)",
+      "Bash(npx tsc -b --noEmit)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(npm install tesseract.js)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(npm run dev)",
+      "Bash(curl -s http://localhost:3001/health)",
+      "Bash(xargs grep -l \"setAISettings\\\\|hasAIKey\\\\|openaiApiKey\")",
+      "Bash(npm run build)",
+      "Bash(netstat -ano)",
+      "Bash(findstr :3001)",
+      "Bash(findstr LISTENING)",
+      "Bash(tasklist /FI \"PID eq 15720\" /FO TABLE)",
+      "Bash(cmd /c \"tasklist /FI \"\"PID eq 15720\"\" /FO TABLE\")",
+      "Bash(wmic process where ProcessId=15720 get Name,CommandLine)",
+      "Bash(taskkill //PID 15720 //F)",
+      "Bash(curl -s -X POST http://localhost:3001/api/ai/enhance-ocr-text -H \"Content-Type: application/json\" -d '{\"\"text\"\": \"\"Ths is a tst of the enhncmnt feture. Plese fix te typos.\"\"}')",
+      "Bash(curl -s -X POST http://localhost:3001/api/ai/ocr -H \"Content-Type: application/json\" -d '{\"\"imageData\"\": \"\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==\"\"}')",
+      "Bash(taskkill //PID 21524 //F)",
+      "Bash(npx vite build)",
+      "Bash(npm install @supabase/supabase-js)",
+      "Bash(npm install @supabase/supabase-js helmet express-rate-limit)",
+      "Bash(timeout 5 node index.js)"
+    ]
+  }
+}
