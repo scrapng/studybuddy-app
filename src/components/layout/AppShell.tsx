@@ -2,9 +2,11 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { MobileNav } from './MobileNav'
 import { Toaster } from '@/components/ui/sonner'
+import { useGlowEffect } from '@/hooks/useGlowEffect'
 
 export function AppShell() {
   const location = useLocation()
+  useGlowEffect()
 
   return (
     <div className="flex min-h-screen bg-background">
