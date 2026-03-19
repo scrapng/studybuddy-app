@@ -1,11 +1,10 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, Link } from 'react-router-dom'
 import {
   LayoutDashboard,
   BookOpen,
   BarChart3,
   Calendar,
   Trophy,
-  GraduationCap,
   PanelLeftClose,
   PanelLeft,
   Sparkles,
@@ -18,6 +17,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useTranslation } from '@/hooks/useTranslation'
 import { ThemeToggle } from './ThemeToggle'
 import { LanguageToggle } from './LanguageToggle'
+import { AppLogo } from '@/components/shared/AppLogo'
 
 export function Sidebar() {
   const { settings, toggleSidebar } = useSettingsContext()
@@ -37,14 +37,14 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        'hidden lg:flex flex-col border-r bg-card h-screen sticky top-0 transition-all duration-300',
+        'hidden lg:flex flex-col border-r glass-sidebar h-screen sticky top-0 transition-all duration-300',
         collapsed ? 'w-16' : 'w-64'
       )}
     >
-      <div className={cn('flex items-center gap-2 p-4 border-b', collapsed && 'justify-center')}>
-        <GraduationCap className="h-6 w-6 text-primary shrink-0" />
+      <Link to="/" className={cn('flex items-center gap-2 p-4 border-b hover:bg-accent/50 transition-colors', collapsed && 'justify-center')}>
+        <AppLogo className="h-6 w-6 shrink-0" />
         {!collapsed && <span className="font-bold text-lg">{t.app.name}</span>}
-      </div>
+      </Link>
 
       <nav className="flex-1 p-2 space-y-1">
         {navItems.map(item => (

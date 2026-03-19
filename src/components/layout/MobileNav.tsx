@@ -1,11 +1,10 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, Link } from 'react-router-dom'
 import {
   LayoutDashboard,
   BookOpen,
   BarChart3,
   Calendar,
   Trophy,
-  GraduationCap,
   Menu,
   Sparkles,
   LogOut,
@@ -17,6 +16,7 @@ import { ThemeToggle } from './ThemeToggle'
 import { LanguageToggle } from './LanguageToggle'
 import { useTranslation } from '@/hooks/useTranslation'
 import { useAuth } from '@/contexts/AuthContext'
+import { AppLogo } from '@/components/shared/AppLogo'
 import { useState } from 'react'
 
 export function MobileNav() {
@@ -34,11 +34,11 @@ export function MobileNav() {
   ]
 
   return (
-    <div className="lg:hidden flex items-center justify-between border-b px-4 py-3 bg-card">
-      <div className="flex items-center gap-2">
-        <GraduationCap className="h-6 w-6 text-primary" />
+    <div className="lg:hidden flex items-center justify-between border-b px-4 py-3 glass-nav sticky top-0 z-50">
+      <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+        <AppLogo className="h-6 w-6" />
         <span className="font-bold text-lg">{t.app.name}</span>
-      </div>
+      </Link>
 
       <div className="flex items-center gap-1">
         <ThemeToggle />
@@ -50,7 +50,7 @@ export function MobileNav() {
           <SheetContent side="left" className="w-64">
             <SheetHeader>
               <SheetTitle className="flex items-center gap-2">
-                <GraduationCap className="h-5 w-5 text-primary" />
+                <AppLogo className="h-5 w-5" />
                 {t.app.name}
               </SheetTitle>
             </SheetHeader>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Graduation cap top (diamond shape) -->
+  <polygon points="32,10 58,24 32,38 6,24" fill="currentColor" stroke="currentColor" stroke-width="1.5"/>
+  <!-- Tassel line from top -->
+  <line x1="50" y1="22" x2="50" y2="44" stroke="currentColor" stroke-width="2.5"/>
+  <!-- Tassel end -->
+  <circle cx="50" cy="46" r="2.5" fill="currentColor" stroke="none"/>
+  <!-- Cap band / bottom curve -->
+  <path d="M16,28 L16,40 C16,46 24,52 32,52 C40,52 48,46 48,40 L48,28" stroke="currentColor" stroke-width="2.5" fill="none"/>
+</svg>

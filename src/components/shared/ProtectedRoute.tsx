@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
-import { GraduationCap, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
+import { AppLogo } from '@/components/shared/AppLogo'
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -8,7 +9,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background">
-        <GraduationCap className="h-12 w-12 text-primary mb-4" />
+        <AppLogo className="h-12 w-12 mb-4" />
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     )

@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
-import { GraduationCap, Loader2, Mail } from 'lucide-react'
+import { Loader2, Mail } from 'lucide-react'
+import { AppLogo } from '@/components/shared/AppLogo'
 import { useTranslation } from '@/hooks/useTranslation'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { LanguageToggle } from '@/components/layout/LanguageToggle'
@@ -69,7 +70,7 @@ export function SignUpPage() {
         <Card className="w-full max-w-md">
           <CardContent className="pt-6 text-center space-y-4">
             <div className="inline-flex items-center justify-center rounded-2xl bg-green-100 dark:bg-green-900/30 p-3">
-              <GraduationCap className="h-10 w-10 text-green-600 dark:text-green-400" />
+              <AppLogo className="h-10 w-10" />
             </div>
             <h2 className="text-xl font-bold">{t.auth.signUpSuccess}</h2>
             <Link to="/login">
@@ -89,17 +90,17 @@ export function SignUpPage() {
         <LanguageToggle />
       </div>
 
-      <div className="w-full max-w-md space-y-6">
+      <div className="w-full max-w-md space-y-6 animate-fade-in-up">
         {/* Logo & Title */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center rounded-2xl bg-primary/10 p-3 mb-2">
-            <GraduationCap className="h-10 w-10 text-primary" />
+          <div className="inline-flex items-center justify-center rounded-2xl bg-primary/10 p-3 mb-2 animate-float">
+            <AppLogo className="h-10 w-10" />
           </div>
           <h1 className="text-2xl font-bold">{t.auth.createAccount}</h1>
           <p className="text-muted-foreground text-sm">{t.auth.signUpDesc}</p>
         </div>
 
-        <Card>
+        <Card className="glass-card">
           <CardContent className="pt-6 space-y-4">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
