@@ -179,7 +179,12 @@ export function SchedulePage() {
             </CardHeader>
             <CardContent>
               {upcomingDeadlines.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t.schedule.noDeadlines}</p>
+                <div className="flex flex-col items-center py-4 text-center">
+                  <p className="text-sm text-muted-foreground mb-3">{t.schedule.noDeadlines}</p>
+                  <Link to="/subjects">
+                    <Button size="sm" variant="outline">{t.schedule.noDeadlinesCta}</Button>
+                  </Link>
+                </div>
               ) : (
                 <div className="space-y-2">
                   {upcomingDeadlines.map(d => (

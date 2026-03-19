@@ -1,9 +1,11 @@
 import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line, Legend,
 } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { useSubjects } from '@/hooks/useSubjects'
 import { useSubjectsContext } from '@/contexts/SubjectsContext'
 import { formatDuration } from '@/lib/utils'
@@ -147,7 +149,12 @@ export function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             {allFlashcards.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-12">{t.analytics.noFlashcards}</p>
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <p className="text-sm text-muted-foreground mb-4">{t.analytics.noFlashcards}</p>
+                <Link to="/subjects">
+                  <Button size="sm" variant="outline">{t.analytics.noFlashcardsCta}</Button>
+                </Link>
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
@@ -181,7 +188,12 @@ export function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             {scoreTrend.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-12">{t.analytics.completeSessions}</p>
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <p className="text-sm text-muted-foreground mb-4">{t.analytics.completeSessions}</p>
+                <Link to="/subjects">
+                  <Button size="sm" variant="outline">{t.analytics.completeSessionsCta}</Button>
+                </Link>
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height={250}>
                 <LineChart data={scoreTrend}>
@@ -207,7 +219,12 @@ export function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             {subjectBreakdown.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-12">{t.analytics.noStudySessions}</p>
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <p className="text-sm text-muted-foreground mb-4">{t.analytics.noStudySessions}</p>
+                <Link to="/subjects">
+                  <Button size="sm" variant="outline">{t.analytics.noStudySessionsCta}</Button>
+                </Link>
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={subjectBreakdown} layout="vertical">

@@ -250,7 +250,15 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent>
             {recentSessions.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t.dashboard.noSessions}</p>
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <p className="text-sm text-muted-foreground mb-4">{t.dashboard.noSessions}</p>
+                <Link to="/subjects">
+                  <Button size="sm" variant="outline" className="gap-1.5">
+                    <Plus className="h-3.5 w-3.5" />
+                    {t.dashboard.noSessionsCta}
+                  </Button>
+                </Link>
+              </div>
             ) : (
               <div className="space-y-3">
                 {recentSessions.map(session => (

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
-import { Sparkles, Camera, Wand2, Brain, BookOpen, ArrowRight } from 'lucide-react'
+import { Sparkles, Camera, Wand2, Brain, BookOpen, ArrowRight, Plus } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useSubjectsContext } from '@/contexts/SubjectsContext'
 import { useSubjects } from '@/hooks/useSubjects'
@@ -46,7 +47,15 @@ export function AIToolsPage() {
             <p className="text-xs text-muted-foreground mb-3">{t.ai.chooseSet}</p>
             <div className="space-y-1.5 max-h-40 overflow-y-auto">
               {state.studySets.length === 0 ? (
-                <p className="text-xs text-muted-foreground italic">{t.ai.noSetsYet}</p>
+                <div className="flex flex-col items-center py-3 text-center">
+                  <p className="text-xs text-muted-foreground italic mb-3">{t.ai.noSetsYet}</p>
+                  <Link to="/subjects">
+                    <Button size="sm" variant="outline" className="gap-1.5 text-xs h-7">
+                      <Plus className="h-3 w-3" />
+                      {t.ai.noSetsCta}
+                    </Button>
+                  </Link>
+                </div>
               ) : (
                 state.studySets.slice(0, 5).map(set => {
                   const sub = subjects.find(s => s.id === set.subjectId)
@@ -83,7 +92,14 @@ export function AIToolsPage() {
             <p className="text-xs text-muted-foreground mb-3">{t.ai.setsWithNotes}</p>
             <div className="space-y-1.5 max-h-40 overflow-y-auto">
               {studySetsWithNotes.length === 0 ? (
-                <p className="text-xs text-muted-foreground italic">{t.ai.noNotesEnhance}</p>
+                <div className="flex flex-col items-center py-3 text-center">
+                  <p className="text-xs text-muted-foreground italic mb-3">{t.ai.noNotesEnhance}</p>
+                  <Link to="/subjects">
+                    <Button size="sm" variant="outline" className="gap-1.5 text-xs h-7">
+                      {t.ai.noNotesCta}
+                    </Button>
+                  </Link>
+                </div>
               ) : (
                 studySetsWithNotes.slice(0, 5).map(set => {
                   const sub = subjects.find(s => s.id === set.subjectId)
@@ -118,7 +134,14 @@ export function AIToolsPage() {
             <p className="text-xs text-muted-foreground mb-3">{t.ai.setsWithNotes}</p>
             <div className="space-y-1.5 max-h-40 overflow-y-auto">
               {studySetsWithNotes.length === 0 ? (
-                <p className="text-xs text-muted-foreground italic">{t.ai.noNotesGenerate}</p>
+                <div className="flex flex-col items-center py-3 text-center">
+                  <p className="text-xs text-muted-foreground italic mb-3">{t.ai.noNotesGenerate}</p>
+                  <Link to="/subjects">
+                    <Button size="sm" variant="outline" className="gap-1.5 text-xs h-7">
+                      {t.ai.noNotesCta}
+                    </Button>
+                  </Link>
+                </div>
               ) : (
                 studySetsWithNotes.slice(0, 5).map(set => {
                   const sub = subjects.find(s => s.id === set.subjectId)
