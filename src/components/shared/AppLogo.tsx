@@ -9,7 +9,7 @@ export function AppLogo({ className }: AppLogoProps) {
     <img
       src="/logo.svg"
       alt="StudyBuddy"
-      className={cn('h-6 w-6', className)}
+      className={cn('h-6 w-6 logo-theme', className)}
     />
   )
 }
