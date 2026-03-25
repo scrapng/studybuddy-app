@@ -3,10 +3,13 @@ import { Sidebar } from './Sidebar'
 import { MobileNav } from './MobileNav'
 import { Toaster } from '@/components/ui/sonner'
 import { useGlowEffect } from '@/hooks/useGlowEffect'
+import { useThemeShortcut } from '@/hooks/useThemeShortcut'
+import { ThemeToast } from '@/components/shared/ThemeToast'
 
 export function AppShell() {
   const location = useLocation()
   useGlowEffect()
+  const themeToast = useThemeShortcut()
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -20,6 +23,7 @@ export function AppShell() {
         </main>
       </div>
       <Toaster />
+      {themeToast && <ThemeToast theme={themeToast.theme} visible={themeToast.visible} />}
     </div>
   )
 }

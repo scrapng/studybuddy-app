@@ -1,5 +1,5 @@
 {
-  "app": { "name": "StudyBuddy" },
+  "app": { "name": "NoteBuddy" },
   "nav": {
     "dashboard": "Dashboard",
     "subjects": "Subjects",
@@ -466,7 +466,7 @@
     "instructions": "Answer as many cards as you can before time runs out! Press Space to flip, then 1 (wrong) or 2 (correct)."
   },
   "tutorial": {
-    "welcome": "Welcome to StudyBuddy!",
+    "welcome": "Welcome to NoteBuddy!",
     "welcomeDesc": "Your AI-powered study companion. Let's take a quick tour of the main features.",
     "step1Title": "Create Subjects & Study Sets",
     "step1Desc": "Organize your learning by creating subjects (e.g., Math, Biology) and study sets within them. Each set can contain flashcards, notes, and quiz questions.",
@@ -496,7 +496,7 @@
     "github": "GitHub",
     "welcomeBack": "Welcome back",
     "createAccount": "Create your account",
-    "signInDesc": "Sign in to your StudyBuddy account",
+    "signInDesc": "Sign in to your NoteBuddy account",
     "signUpDesc": "Start your learning journey",
     "passwordMinLength": "Password must be at least 6 characters",
     "passwordsNoMatch": "Passwords do not match",

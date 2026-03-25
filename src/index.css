@@ -533,6 +533,15 @@
   animation: float 3s ease-in-out infinite;
 }
 
+/* Theme toggle icon spin */
+@keyframes spin-once {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin-once {
+  animation: spin-once 0.5s ease-out;
+}
+
 /* Score reveal animation */
 @keyframes score-reveal {
   0% { transform: scale(0.5); opacity: 0; }

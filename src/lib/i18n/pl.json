@@ -1,5 +1,5 @@
 {
-  "app": { "name": "StudyBuddy" },
+  "app": { "name": "NoteBuddy" },
   "nav": {
     "dashboard": "Pulpit",
     "subjects": "Przedmioty",
@@ -466,7 +466,7 @@
     "instructions": "Odpowiedz na jak najwięcej kart zanim skończy się czas! Naciśnij Spację, aby obrócić, potem 1 (źle) lub 2 (dobrze)."
   },
   "tutorial": {
-    "welcome": "Witaj w StudyBuddy!",
+    "welcome": "Witaj w NoteBuddy!",
     "welcomeDesc": "Twój asystent nauki oparty na AI. Poznaj główne funkcje aplikacji.",
     "step1Title": "Twórz przedmioty i zestawy",
     "step1Desc": "Organizuj naukę tworząc przedmioty (np. Matematyka, Biologia) i zestawy nauki. Każdy zestaw może zawierać fiszki, notatki i pytania quizowe.",
@@ -496,7 +496,7 @@
     "github": "GitHub",
     "welcomeBack": "Witaj ponownie",
     "createAccount": "Utwórz konto",
-    "signInDesc": "Zaloguj się do swojego konta StudyBuddy",
+    "signInDesc": "Zaloguj się do swojego konta NoteBuddy",
     "signUpDesc": "Rozpocznij swoją przygodę z nauką",
     "passwordMinLength": "Hasło musi mieć co najmniej 6 znaków",
     "passwordsNoMatch": "Hasła nie są identyczne",

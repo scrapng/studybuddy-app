@@ -52,7 +52,7 @@ const aiLimiter = rateLimit({
 
 // Health check endpoint (public)
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', message: 'StudyBuddy API Server running' })
+  res.json({ status: 'ok', message: 'NoteBuddy API Server running' })
 })
 
 // AI routes (protected + rate limited)
@@ -74,7 +74,7 @@ app.use((err, req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 StudyBuddy AI Server running on http://localhost:${PORT}`)
+  console.log(`🚀 NoteBuddy AI Server running on http://localhost:${PORT}`)
   if (isDev) {
     console.log('📌 Running in development mode (CORS: allow all origins)')
     if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
