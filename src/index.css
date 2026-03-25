@@ -130,11 +130,11 @@
 
 /* ===== LOGO THEME ===== */
 .logo-theme {
-  filter: invert(1);
+  filter: invert(0);
   transition: filter 0.3s ease;
 }
 .dark .logo-theme {
-  filter: invert(0);
+  filter: invert(1);
 }
 
 /* ===== FROSTED GLASS ===== */

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { useSubjects } from '@/hooks/useSubjects'
 import { useSubjectsContext } from '@/contexts/SubjectsContext'
+import { useAuth } from '@/contexts/AuthContext'
 import { useTranslation } from '@/hooks/useTranslation'
 import { formatDuration, getGreeting, getRelativeTime, daysUntil } from '@/lib/utils'
 import { getStudyRecommendation } from '@/lib/spaced-repetition'
@@ -16,19 +17,23 @@ import { TutorialDialog } from '@/components/shared/TutorialDialog'
 export function DashboardPage() {
   const { subjects, stats, sessions } = useSubjects()
   const { state } = useSubjectsContext()
+  const { user } = useAuth()
   const { t } = useTranslation()
   const recentSessions = [...sessions].sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()).slice(0, 5)
 
   const [tutorialOpen, setTutorialOpen] = useState(false)
 
-  // Show tutorial on first visit
+  // Show tutorial only once per user (first time a new user opens the app)
+  const userId = user?.id
   useEffect(() => {
-    const seen = localStorage.getItem('studybuddy-tutorial-seen')
+    if (!userId) return
+    const key = `notebuddy-tutorial-seen-${userId}`
+    const seen = localStorage.getItem(key)
     if (!seen) {
       setTutorialOpen(true)
-      localStorage.setItem('studybuddy-tutorial-seen', '1')
+      localStorage.setItem(key, '1')
     }
-  }, [])
+  }, [userId])
 
   const dueReview = useMemo(() => {
     return state.studySets
