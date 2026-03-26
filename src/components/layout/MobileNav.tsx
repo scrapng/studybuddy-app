@@ -8,6 +8,7 @@ import {
   Menu,
   Sparkles,
   LogOut,
+  Settings,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -31,6 +32,7 @@ export function MobileNav() {
     { to: '/analytics', icon: BarChart3, label: t.nav.analytics },
     { to: '/schedule', icon: Calendar, label: t.nav.schedule },
     { to: '/achievements', icon: Trophy, label: t.nav.achievements },
+    { to: '/settings', icon: Settings, label: t.nav.settings },
   ]
 
   return (

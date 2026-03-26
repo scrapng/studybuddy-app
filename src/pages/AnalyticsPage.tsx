@@ -90,34 +90,42 @@ export function AnalyticsPage() {
 
       {/* Overview stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 stagger-grid">
-        <Card className="card-hover-lift">
-          <CardContent className="pt-4">
-            <p className="text-sm text-muted-foreground">{t.analytics.totalStudyTime}</p>
-            <p className="text-2xl font-bold animate-count-up">{formatDuration(stats.totalStudyTime)}</p>
-          </CardContent>
-        </Card>
-        <Card className="card-hover-lift">
-          <CardContent className="pt-4">
-            <p className="text-sm text-muted-foreground">{t.analytics.totalSessions}</p>
-            <p className="text-2xl font-bold animate-count-up">{stats.totalSessions}</p>
-          </CardContent>
-        </Card>
-        <Card className="card-hover-lift">
-          <CardContent className="pt-4">
-            <p className="text-sm text-muted-foreground">{t.analytics.cardsMastered}</p>
-            <p className="text-2xl font-bold animate-count-up">{stats.masteredCards} <span className="text-sm font-normal text-muted-foreground">/ {stats.totalFlashcards}</span></p>
-          </CardContent>
-        </Card>
-        <Card className="card-hover-lift">
-          <CardContent className="pt-4">
-            <p className="text-sm text-muted-foreground">{t.analytics.avgScore}</p>
-            <p className="text-2xl font-bold animate-count-up">
-              {sessions.length > 0
-                ? Math.round(sessions.reduce((t, s) => t + (s.score ?? 0), 0) / sessions.length)
-                : 0}%
-            </p>
-          </CardContent>
-        </Card>
+        <Link to="/schedule">
+          <Card className="card-hover-lift cursor-pointer h-full">
+            <CardContent className="pt-4">
+              <p className="text-sm text-muted-foreground">{t.analytics.totalStudyTime}</p>
+              <p className="text-2xl font-bold animate-count-up">{formatDuration(stats.totalStudyTime)}</p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link to="/schedule">
+          <Card className="card-hover-lift cursor-pointer h-full">
+            <CardContent className="pt-4">
+              <p className="text-sm text-muted-foreground">{t.analytics.totalSessions}</p>
+              <p className="text-2xl font-bold animate-count-up">{stats.totalSessions}</p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link to="/subjects">
+          <Card className="card-hover-lift cursor-pointer h-full">
+            <CardContent className="pt-4">
+              <p className="text-sm text-muted-foreground">{t.analytics.cardsMastered}</p>
+              <p className="text-2xl font-bold animate-count-up">{stats.masteredCards} <span className="text-sm font-normal text-muted-foreground">/ {stats.totalFlashcards}</span></p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link to="/schedule">
+          <Card className="card-hover-lift cursor-pointer h-full">
+            <CardContent className="pt-4">
+              <p className="text-sm text-muted-foreground">{t.analytics.avgScore}</p>
+              <p className="text-2xl font-bold animate-count-up">
+                {sessions.length > 0
+                  ? Math.round(sessions.reduce((t, s) => t + (s.score ?? 0), 0) / sessions.length)
+                  : 0}%
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6 stagger-grid">

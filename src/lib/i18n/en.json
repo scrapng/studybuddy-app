@@ -6,7 +6,8 @@
     "aiTools": "AI Tools",
     "analytics": "Analytics",
     "schedule": "Schedule",
-    "achievements": "Achievements"
+    "achievements": "Achievements",
+    "settings": "Settings"
   },
   "lang": { "english": "English", "polish": "Polski" },
   "common": {
@@ -156,7 +157,9 @@
     "noteTitle": "Title",
     "extractedText": "Extracted Text",
     "enhanceWithAI": "Enhance with AI",
-    "saveNote": "Save Note"
+    "saveNote": "Save Note",
+    "noTextFound": "No text could be detected in this image. Try a clearer photo.",
+    "ocrFailed": "OCR processing failed. Please try again with a different image."
   },
   "aiEnhance": {
     "title": "AI Note Enhancement",
@@ -503,5 +506,36 @@
     "signUpSuccess": "Account created! Check your email to verify.",
     "signInError": "Failed to sign in. Check your credentials.",
     "signUpError": "Failed to create account. Try again."
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "emailVerified": "Email verified",
+    "joined": "Joined",
+    "yourData": "Your Data",
+    "subjects": "Subjects",
+    "studySets": "Sets",
+    "flashcards": "Cards",
+    "notes": "Notes",
+    "questions": "Questions",
+    "sessions": "Sessions",
+    "changePassword": "Change Password",
+    "newPassword": "New Password",
+    "updatePassword": "Update Password",
+    "passwordUpdated": "Password updated successfully",
+    "dangerZone": "Danger Zone",
+    "deleteAllData": "Delete All Study Data",
+    "deleteDataDesc": "Remove all subjects, study sets, notes, and sessions.",
+    "deleteData": "Delete Data",
+    "deleteDataWarn": "This will permanently delete all your study data. This cannot be undone.",
+    "confirmDelete": "Yes, Delete Everything",
+    "dataDeleted": "All study data has been deleted",
+    "deleteAccount": "Delete Account",
+    "deleteAccountDesc": "Permanently delete your account and all data.",
+    "deleteAccountWarn": "This will permanently delete your account and all associated data. Type DELETE to confirm.",
+    "typeDelete": "Type DELETE to confirm",
+    "permanentlyDelete": "Permanently Delete Account",
+    "accountDeleted": "Account deleted successfully",
+    "signOutDesc": "Sign out of your account on this device."
   }
 }

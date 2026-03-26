@@ -70,47 +70,61 @@ export function PhotoNoteUpload({ open, onOpenChange, setId }: PhotoNoteUploadPr
       // Try AI vision first via backend
       try {
         setOcrStatus(t.photoUpload.readingImage)
-        setOcrProgress(50)
+        setOcrProgress(30)
         const text = await readImageWithAI(base64, lang, subjectName)
-        setExtractedText(text)
-        setOcrProgress(100)
-        setOcrStatus(t.photoUpload.done)
-        setStep('review')
-        return
+        if (text && text.trim().length > 0) {
+          setExtractedText(text)
+          setOcrProgress(100)
+          setOcrStatus(t.photoUpload.done)
+          setStep('review')
+          return
+        }
+        // Empty response — fall through to Tesseract
+        console.warn('AI OCR returned empty text, falling back to local OCR')
       } catch (error) {
         // Fall back to Tesseract
         console.warn('AI OCR failed, falling back to local OCR:', error)
-        setOcrStatus(t.photoUpload.fallingBack)
       }
 
-      // Local Tesseract OCR
+      setOcrStatus(t.photoUpload.fallingBack)
+      setOcrProgress(10)
+
+      // Local Tesseract OCR — use correct language
+      const tesseractLang = lang === 'pl' ? 'pol+eng' : 'eng'
       try {
         setOcrStatus(t.photoUpload.initOCR)
-        setOcrProgress(10)
+        setOcrProgress(15)
 
-        const result = await Tesseract.recognize(base64, 'eng', {
+        const result = await Tesseract.recognize(base64, tesseractLang, {
           logger: (m) => {
             if (m.status === 'recognizing text') {
-              setOcrProgress(10 + Math.round((m.progress || 0) * 80))
+              setOcrProgress(15 + Math.round((m.progress || 0) * 70))
               setOcrStatus(t.photoUpload.recognizing)
-            } else {
-              setOcrStatus(m.status)
+            } else if (m.status === 'loading tesseract core' || m.status === 'loading language traineddata') {
+              setOcrStatus(t.photoUpload.initOCR)
             }
           },
         })
 
         let text = result.data.text.trim()
-        setOcrProgress(90)
+        setOcrProgress(88)
+
+        if (text.length === 0) {
+          toast.error(t.photoUpload.noTextFound)
+          setStep('upload')
+          return
+        }
 
         // Enhance with AI via backend if text was extracted
-        if (text.length > 0) {
-          setOcrStatus(t.photoUpload.enhancingAI)
-          try {
-            text = await enhanceOCRText(text, lang, subjectName)
-          } catch (error) {
-            // Use raw text if AI fails
-            console.warn('AI enhancement failed, using raw OCR text:', error)
+        setOcrStatus(t.photoUpload.enhancingAI)
+        try {
+          const enhanced = await enhanceOCRText(text, lang, subjectName)
+          if (enhanced && enhanced.trim().length > 0) {
+            text = enhanced
           }
+        } catch (error) {
+          // Use raw text if AI fails
+          console.warn('AI enhancement failed, using raw OCR text:', error)
         }
 
         setExtractedText(text)
@@ -118,7 +132,8 @@ export function PhotoNoteUpload({ open, onOpenChange, setId }: PhotoNoteUploadPr
         setOcrStatus(t.photoUpload.done)
         setStep('review')
       } catch (error) {
-        toast.error('OCR processing failed. Please try again.')
+        console.error('Tesseract OCR failed:', error)
+        toast.error(t.photoUpload.ocrFailed)
         setStep('upload')
       }
     }

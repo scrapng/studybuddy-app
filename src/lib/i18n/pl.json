@@ -6,7 +6,8 @@
     "aiTools": "Narzędzia AI",
     "analytics": "Analityka",
     "schedule": "Harmonogram",
-    "achievements": "Osiągnięcia"
+    "achievements": "Osiągnięcia",
+    "settings": "Ustawienia"
   },
   "lang": { "english": "English", "polish": "Polski" },
   "common": {
@@ -156,7 +157,9 @@
     "noteTitle": "Tytuł",
     "extractedText": "Wyodrębniony tekst",
     "enhanceWithAI": "Ulepsz za pomocą AI",
-    "saveNote": "Zapisz notatkę"
+    "saveNote": "Zapisz notatkę",
+    "noTextFound": "Nie udało się wykryć tekstu na tym zdjęciu. Spróbuj wyraźniejsze zdjęcie.",
+    "ocrFailed": "Przetwarzanie OCR nie powiodło się. Spróbuj ponownie z innym zdjęciem."
   },
   "aiEnhance": {
     "title": "Ulepszanie notatek AI",
@@ -503,5 +506,36 @@
     "signUpSuccess": "Konto utworzone! Sprawdź e-mail, aby je zweryfikować.",
     "signInError": "Logowanie nie powiodło się. Sprawdź dane logowania.",
     "signUpError": "Nie udało się utworzyć konta. Spróbuj ponownie."
+  },
+  "settings": {
+    "title": "Ustawienia",
+    "profile": "Profil",
+    "emailVerified": "E-mail zweryfikowany",
+    "joined": "Dołączono",
+    "yourData": "Twoje dane",
+    "subjects": "Przedmioty",
+    "studySets": "Zestawy",
+    "flashcards": "Karty",
+    "notes": "Notatki",
+    "questions": "Pytania",
+    "sessions": "Sesje",
+    "changePassword": "Zmień hasło",
+    "newPassword": "Nowe hasło",
+    "updatePassword": "Zaktualizuj hasło",
+    "passwordUpdated": "Hasło zaktualizowane pomyślnie",
+    "dangerZone": "Strefa zagrożenia",
+    "deleteAllData": "Usuń wszystkie dane nauki",
+    "deleteDataDesc": "Usuń wszystkie przedmioty, zestawy, notatki i sesje.",
+    "deleteData": "Usuń dane",
+    "deleteDataWarn": "To trwale usunie wszystkie Twoje dane nauki. Nie można tego cofnąć.",
+    "confirmDelete": "Tak, usuń wszystko",
+    "dataDeleted": "Wszystkie dane nauki zostały usunięte",
+    "deleteAccount": "Usuń konto",
+    "deleteAccountDesc": "Trwale usuń konto i wszystkie dane.",
+    "deleteAccountWarn": "To trwale usunie Twoje konto i wszystkie powiązane dane. Wpisz DELETE, aby potwierdzić.",
+    "typeDelete": "Wpisz DELETE, aby potwierdzić",
+    "permanentlyDelete": "Trwale usuń konto",
+    "accountDeleted": "Konto usunięte pomyślnie",
+    "signOutDesc": "Wyloguj się z konta na tym urządzeniu."
   }
 }

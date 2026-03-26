@@ -84,49 +84,57 @@ export function DashboardPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 stagger-grid">
-        <Card className="card-hover-lift">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">{t.dashboard.studyTime}</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold animate-count-up">{formatDuration(stats.totalStudyTime)}</div>
-            <p className="text-xs text-muted-foreground">{stats.totalSessions} {t.common.sessions}</p>
-          </CardContent>
-        </Card>
+        <Link to="/analytics">
+          <Card className="card-hover-lift cursor-pointer h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t.dashboard.studyTime}</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold animate-count-up">{formatDuration(stats.totalStudyTime)}</div>
+              <p className="text-xs text-muted-foreground">{stats.totalSessions} {t.common.sessions}</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card className="card-hover-lift">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">{t.dashboard.streak}</CardTitle>
-            <Flame className="h-4 w-4 text-orange-500 pulse-ring" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold animate-count-up">{stats.streak} {t.common.days}</div>
-            <p className="text-xs text-muted-foreground">{t.dashboard.keepItUp}</p>
-          </CardContent>
-        </Card>
+        <Link to="/analytics">
+          <Card className="card-hover-lift cursor-pointer h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t.dashboard.streak}</CardTitle>
+              <Flame className="h-4 w-4 text-orange-500 pulse-ring" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold animate-count-up">{stats.streak} {t.common.days}</div>
+              <p className="text-xs text-muted-foreground">{t.dashboard.keepItUp}</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card className="card-hover-lift">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">{t.dashboard.subjects}</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold animate-count-up">{subjects.length}</div>
-            <p className="text-xs text-muted-foreground">{t.dashboard.activeSubjects}</p>
-          </CardContent>
-        </Card>
+        <Link to="/subjects">
+          <Card className="card-hover-lift cursor-pointer h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t.dashboard.subjects}</CardTitle>
+              <BookOpen className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold animate-count-up">{subjects.length}</div>
+              <p className="text-xs text-muted-foreground">{t.dashboard.activeSubjects}</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card className="card-hover-lift">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">{t.dashboard.mastered}</CardTitle>
-            <Brain className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold animate-count-up">{stats.masteredCards}</div>
-            <p className="text-xs text-muted-foreground">{t.common.of} {stats.totalFlashcards} {t.common.cards}</p>
-          </CardContent>
-        </Card>
+        <Link to="/analytics">
+          <Card className="card-hover-lift cursor-pointer h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t.dashboard.mastered}</CardTitle>
+              <Brain className="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold animate-count-up">{stats.masteredCards}</div>
+              <p className="text-xs text-muted-foreground">{t.common.of} {stats.totalFlashcards} {t.common.cards}</p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       {/* AI-Powered Tools */}
@@ -210,23 +218,25 @@ export function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="card-hover-lift">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Trophy className="h-4 w-4 text-yellow-500 animate-float" />
-                  {t.dashboard.achievements}
-                </CardTitle>
-                <Link to="/achievements" className="text-xs text-primary hover:underline">{t.common.viewAll}</Link>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-3 animate-progress">
-                <Progress value={(achievementProgress.unlocked / achievementProgress.total) * 100} className="flex-1 h-2" />
-                <span className="text-sm font-medium">{achievementProgress.unlocked}/{achievementProgress.total}</span>
-              </div>
-            </CardContent>
-          </Card>
+          <Link to="/achievements">
+            <Card className="card-hover-lift cursor-pointer">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Trophy className="h-4 w-4 text-yellow-500 animate-float" />
+                    {t.dashboard.achievements}
+                  </CardTitle>
+                  <span className="text-xs text-primary">{t.common.viewAll}</span>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-3 animate-progress">
+                  <Progress value={(achievementProgress.unlocked / achievementProgress.total) * 100} className="flex-1 h-2" />
+                  <span className="text-sm font-medium">{achievementProgress.unlocked}/{achievementProgress.total}</span>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
 
           {deadlines.length > 0 && (
             <Card className="card-hover-lift">
@@ -251,7 +261,10 @@ export function DashboardPage() {
 
         <Card className="animate-in fade-in slide-in-from-right-4 duration-500">
           <CardHeader>
-            <CardTitle>{t.dashboard.recentActivity}</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>{t.dashboard.recentActivity}</CardTitle>
+              <Link to="/schedule" className="text-xs text-primary hover:underline">{t.common.viewAll}</Link>
+            </div>
           </CardHeader>
           <CardContent>
             {recentSessions.length === 0 ? (

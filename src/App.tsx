@@ -20,6 +20,8 @@ import { AchievementsPage } from '@/pages/AchievementsPage'
 import { TimedChallengePage } from '@/pages/TimedChallengePage'
 import { AIToolsPage } from '@/pages/AIToolsPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import { LandingPage } from '@/pages/LandingPage'
+import { SettingsPage } from '@/pages/SettingsPage'
 
 function AuthenticatedApp() {
   const { user } = useAuth()
@@ -30,6 +32,7 @@ function AuthenticatedApp() {
         <TooltipProvider>
           <Routes>
             {/* Public routes */}
+            <Route path="/welcome" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignUpPage />} />
 
@@ -51,6 +54,7 @@ function AuthenticatedApp() {
               <Route path="/schedule" element={<SchedulePage />} />
               <Route path="/achievements" element={<AchievementsPage />} />
               <Route path="/ai-tools" element={<AIToolsPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
               <Route path="/challenge/:setId" element={<TimedChallengePage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Route>
