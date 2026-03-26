@@ -9,7 +9,7 @@ import { useSubjects } from '@/hooks/useSubjects'
 import { useSubjectsContext } from '@/contexts/SubjectsContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTranslation } from '@/hooks/useTranslation'
-import { formatDuration, getGreeting, getRelativeTime, daysUntil } from '@/lib/utils'
+import { formatDuration, getRelativeTime, daysUntil } from '@/lib/utils'
 import { getStudyRecommendation } from '@/lib/spaced-repetition'
 import { getUnlockedAchievements, ACHIEVEMENTS, type AchievementData } from '@/lib/achievements'
 import { TutorialDialog } from '@/components/shared/TutorialDialog'
@@ -73,7 +73,12 @@ export function DashboardPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between animate-in fade-in duration-500">
         <div>
-          <h1 className="text-2xl font-bold">{getGreeting()}!</h1>
+          <h1 className="text-2xl font-bold">{(() => {
+            const hour = new Date().getHours()
+            if (hour < 12) return t.dashboard.goodMorning
+            if (hour < 18) return t.dashboard.goodAfternoon
+            return t.dashboard.goodEvening
+          })()}!</h1>
           <p className="text-muted-foreground">{t.dashboard.greeting}</p>
         </div>
         <Button variant="ghost" size="sm" onClick={() => setTutorialOpen(true)} className="gap-1.5 text-muted-foreground">

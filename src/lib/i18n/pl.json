@@ -83,6 +83,9 @@
   },
   "dashboard": {
     "greeting": "Oto Twój przegląd nauki",
+    "goodMorning": "Dzień dobry",
+    "goodAfternoon": "Dzień dobry",
+    "goodEvening": "Dobry wieczór",
     "studyTime": "Czas nauki",
     "streak": "Seria",
     "subjects": "Przedmioty",

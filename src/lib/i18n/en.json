@@ -83,6 +83,9 @@
   },
   "dashboard": {
     "greeting": "Here's your study overview",
+    "goodMorning": "Good morning",
+    "goodAfternoon": "Good afternoon",
+    "goodEvening": "Good evening",
     "studyTime": "Study Time",
     "streak": "Streak",
     "subjects": "Subjects",
