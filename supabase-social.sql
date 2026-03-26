@@ -321,10 +321,17 @@ CREATE POLICY "Users can delete own notifications"
 -- ============================================================
 -- Enable Realtime on social tables
 -- ============================================================
-BEGIN;
-ALTER PUBLICATION supabase_realtime ADD TABLE IF NOT EXISTS friendships;
-ALTER PUBLICATION supabase_realtime ADD TABLE IF NOT EXISTS messages;
-ALTER PUBLICATION supabase_realtime ADD TABLE IF NOT EXISTS notifications;
-ALTER PUBLICATION supabase_realtime ADD TABLE IF NOT EXISTS group_members;
-ALTER PUBLICATION supabase_realtime ADD TABLE IF NOT EXISTS shared_content;
-COMMIT;
+ALTER PUBLICATION supabase_realtime DROP TABLE IF EXISTS friendships;
+ALTER PUBLICATION supabase_realtime ADD TABLE friendships;
+
+ALTER PUBLICATION supabase_realtime DROP TABLE IF EXISTS messages;
+ALTER PUBLICATION supabase_realtime ADD TABLE messages;
+
+ALTER PUBLICATION supabase_realtime DROP TABLE IF EXISTS notifications;
+ALTER PUBLICATION supabase_realtime ADD TABLE notifications;
+
+ALTER PUBLICATION supabase_realtime DROP TABLE IF EXISTS group_members;
+ALTER PUBLICATION supabase_realtime ADD TABLE group_members;
+
+ALTER PUBLICATION supabase_realtime DROP TABLE IF EXISTS shared_content;
+ALTER PUBLICATION supabase_realtime ADD TABLE shared_content;
