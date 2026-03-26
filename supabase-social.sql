@@ -118,13 +118,6 @@ CREATE TABLE IF NOT EXISTS study_groups (
 
 ALTER TABLE study_groups ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Group members can view their groups"
-  ON study_groups FOR SELECT
-  USING (
-    auth.uid() = owner_id OR
-    auth.uid() IN (SELECT user_id FROM group_members WHERE group_id = id)
-  );
-
 CREATE POLICY "Authenticated users can create groups"
   ON study_groups FOR INSERT WITH CHECK (auth.uid() = owner_id);
 
@@ -161,6 +154,15 @@ CREATE POLICY "Members can leave or be removed"
   USING (
     auth.uid() = user_id OR
     auth.uid() IN (SELECT user_id FROM group_members WHERE group_id = group_members.group_id AND role = 'owner')
+  );
+
+
+-- Add group view policy for study_groups (after group_members exists)
+CREATE POLICY "Group members can view their groups"
+  ON study_groups FOR SELECT
+  USING (
+    auth.uid() = owner_id OR
+    auth.uid() IN (SELECT user_id FROM group_members WHERE group_id = id)
   );
 
 

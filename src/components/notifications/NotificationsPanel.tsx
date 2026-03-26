@@ -122,7 +122,8 @@ export function NotificationsPanel() {
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
                 <Bell className="h-8 w-8 text-muted-foreground/40" />
-                <p className="text-sm text-muted-foreground">No notifications yet</p>
+                <p className="text-sm font-medium text-muted-foreground">There are no notifications</p>
+                <p className="text-xs text-muted-foreground/60">You're all caught up!</p>
               </div>
             ) : (
               <div className="divide-y">

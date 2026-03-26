@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { UserPlus, MessageCircle, User, Search } from 'lucide-react'
+import { UserPlus, MessageCircle, User, Search, Copy, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -8,6 +8,7 @@ import { AddFriendDialog } from './AddFriendDialog'
 import { useSocialContext } from '@/contexts/SocialContext'
 import type { Friend } from '@/types/social'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 interface Props {
   selectedFriendId?: string
@@ -15,9 +16,18 @@ interface Props {
 }
 
 export function FriendsList({ selectedFriendId, onSelectFriend }: Props) {
-  const { friends, pendingIncoming, unreadMessageCounts } = useSocialContext()
+  const { friends, pendingIncoming, unreadMessageCounts, profile } = useSocialContext()
   const [addOpen, setAddOpen] = useState(false)
   const [search, setSearch] = useState('')
+  const [copied, setCopied] = useState(false)
+
+  function copyCode() {
+    if (!profile?.friend_code) return
+    navigator.clipboard.writeText(profile.friend_code)
+    toast.success('Friend code copied!')
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   const filtered = friends.filter(f => {
     const name = f.profile.display_name || f.profile.friend_code
@@ -35,6 +45,17 @@ export function FriendsList({ selectedFriendId, onSelectFriend }: Props) {
             Add
           </Button>
         </div>
+        {profile && (
+          <div className="flex items-center justify-between bg-muted/50 rounded-lg px-3 py-1.5">
+            <div>
+              <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Your code</p>
+              <p className="font-mono font-bold text-sm tracking-widest text-primary">{profile.friend_code}</p>
+            </div>
+            <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0" onClick={copyCode} title="Copy friend code">
+              {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+            </Button>
+          </div>
+        )}
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input
