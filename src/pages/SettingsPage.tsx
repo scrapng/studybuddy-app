@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { User, Trash2, AlertTriangle, LogOut, Mail, Calendar, Shield } from 'lucide-react'
+import { User, Trash2, AlertTriangle, LogOut, Mail, Calendar, Shield, Copy, Users } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/contexts/AuthContext'
 import { useSubjectsContext } from '@/contexts/SubjectsContext'
+import { useSocialContext } from '@/contexts/SocialContext'
 import { useTranslation } from '@/hooks/useTranslation'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
@@ -14,6 +15,7 @@ import { toast } from 'sonner'
 export function SettingsPage() {
   const { user, signOut } = useAuth()
   const { state, dispatch } = useSubjectsContext()
+  const { profile } = useSocialContext()
   const { t } = useTranslation()
   const navigate = useNavigate()
 
@@ -138,6 +140,41 @@ export function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Friend Code */}
+      {profile && (
+        <Card className="card-hover-lift">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Users className="h-4 w-4" />
+              Friend Code
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-3">
+              Share this code with friends so they can add you.
+            </p>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 bg-muted/50 rounded-lg p-3 text-center">
+                <p className="font-mono font-bold text-2xl tracking-widest text-primary">
+                  {profile.friend_code}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  navigator.clipboard.writeText(profile.friend_code)
+                  toast.success('Friend code copied!')
+                }}
+                title="Copy"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Data Overview */}
       <Card className="card-hover-lift">

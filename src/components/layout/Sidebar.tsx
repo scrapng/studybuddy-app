@@ -10,6 +10,8 @@ import {
   Sparkles,
   LogOut,
   Settings,
+  Users,
+  UsersRound,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -19,6 +21,7 @@ import { useTranslation } from '@/hooks/useTranslation'
 import { ThemeToggle } from './ThemeToggle'
 import { LanguageToggle } from './LanguageToggle'
 import { AppLogo } from '@/components/shared/AppLogo'
+import { NotificationsPanel } from '@/components/notifications/NotificationsPanel'
 
 export function Sidebar() {
   const { settings, toggleSidebar } = useSettingsContext()
@@ -33,6 +36,8 @@ export function Sidebar() {
     { to: '/analytics', icon: BarChart3, label: t.nav.analytics },
     { to: '/schedule', icon: Calendar, label: t.nav.schedule },
     { to: '/achievements', icon: Trophy, label: t.nav.achievements },
+    { to: '/social', icon: Users, label: t.nav.social },
+    { to: '/groups', icon: UsersRound, label: t.nav.groups },
     { to: '/settings', icon: Settings, label: t.nav.settings },
   ]
 
@@ -83,6 +88,7 @@ export function Sidebar() {
         )}
         <div className={cn('flex items-center', collapsed ? 'justify-center flex-col gap-1' : 'justify-between')}>
           <div className="flex items-center gap-1">
+            <NotificationsPanel />
             <ThemeToggle />
             <LanguageToggle />
             <Button

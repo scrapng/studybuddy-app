@@ -22,11 +22,16 @@ import { AIToolsPage } from '@/pages/AIToolsPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { LandingPage } from '@/pages/LandingPage'
 import { SettingsPage } from '@/pages/SettingsPage'
+import { SocialPage } from '@/pages/SocialPage'
+import { GroupsPage } from '@/pages/GroupsPage'
+import { SocialProvider } from '@/contexts/SocialContext'
+import { FriendRequestBanner } from '@/components/social/FriendRequestBanner'
 
 function AuthenticatedApp() {
   const { user } = useAuth()
 
   return (
+    <SocialProvider>
     <SubjectsProvider key={user?.id ?? 'none'}>
       <SessionProvider>
         <TooltipProvider>
@@ -55,13 +60,17 @@ function AuthenticatedApp() {
               <Route path="/achievements" element={<AchievementsPage />} />
               <Route path="/ai-tools" element={<AIToolsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/social" element={<SocialPage />} />
+              <Route path="/groups" element={<GroupsPage />} />
               <Route path="/challenge/:setId" element={<TimedChallengePage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Routes>
+          <FriendRequestBanner />
         </TooltipProvider>
       </SessionProvider>
     </SubjectsProvider>
+    </SocialProvider>
   )
 }
 
