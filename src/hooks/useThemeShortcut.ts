@@ -6,7 +6,7 @@ import { useSettingsContext } from '@/contexts/SettingsContext'
  * Returns the current toast state so the component can render an overlay.
  */
 export function useThemeShortcut() {
-  const { settings, setTheme } = useSettingsContext()
+  const { setTheme } = useSettingsContext()
   const [toast, setToast] = useState<{ theme: string; visible: boolean } | null>(null)
 
   const toggle = useCallback(() => {
