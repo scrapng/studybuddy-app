@@ -43,6 +43,8 @@ CREATE POLICY "Users can update own profile"
   ON profiles FOR UPDATE USING (auth.uid() = id);
 
 -- Auto-create profile with unique friend code on new user signup
+-- Drop trigger first (it depends on the function), then drop function
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 DROP FUNCTION IF EXISTS create_profile_on_signup();
 CREATE OR REPLACE FUNCTION create_profile_on_signup()
 RETURNS TRIGGER AS $$
