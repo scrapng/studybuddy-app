@@ -1,6 +1,7 @@
 -- ============================================================
 -- SOCIAL FEATURES MIGRATION
 -- Run this in Supabase SQL Editor (Dashboard → SQL Editor → New Query)
+-- This migration is safe to run multiple times (idempotent)
 -- ============================================================
 
 -- Helper: auto-update updated_at column
@@ -24,7 +25,13 @@ CREATE TABLE IF NOT EXISTS profiles (
   created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Drop and recreate RLS if it exists
+ALTER TABLE profiles DISABLE ROW LEVEL SECURITY;
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Profiles readable by authenticated users" ON profiles;
+DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 
 CREATE POLICY "Profiles readable by authenticated users"
   ON profiles FOR SELECT USING (auth.uid() IS NOT NULL);
@@ -36,6 +43,7 @@ CREATE POLICY "Users can update own profile"
   ON profiles FOR UPDATE USING (auth.uid() = id);
 
 -- Auto-create profile with unique friend code on new user signup
+DROP FUNCTION IF EXISTS create_profile_on_signup();
 CREATE OR REPLACE FUNCTION create_profile_on_signup()
 RETURNS TRIGGER AS $$
 DECLARE code CHAR(8);
@@ -81,8 +89,14 @@ CREATE TABLE IF NOT EXISTS friendships (
   CHECK (requester_id <> addressee_id)
 );
 
+ALTER TABLE friendships DISABLE ROW LEVEL SECURITY;
 ALTER TABLE friendships ENABLE ROW LEVEL SECURITY;
 ALTER TABLE friendships REPLICA IDENTITY FULL;
+
+DROP POLICY IF EXISTS "Users can view their own friendships" ON friendships;
+DROP POLICY IF EXISTS "Users can send friend requests" ON friendships;
+DROP POLICY IF EXISTS "Users can update their own friendships" ON friendships;
+DROP POLICY IF EXISTS "Users can delete their own friendships" ON friendships;
 
 CREATE POLICY "Users can view their own friendships"
   ON friendships FOR SELECT
@@ -99,6 +113,7 @@ CREATE POLICY "Users can delete their own friendships"
   ON friendships FOR DELETE
   USING (auth.uid() = requester_id OR auth.uid() = addressee_id);
 
+DROP TRIGGER IF EXISTS friendships_updated_at ON friendships;
 CREATE TRIGGER friendships_updated_at
   BEFORE UPDATE ON friendships
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
@@ -116,7 +131,13 @@ CREATE TABLE IF NOT EXISTS study_groups (
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+ALTER TABLE study_groups DISABLE ROW LEVEL SECURITY;
 ALTER TABLE study_groups ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Authenticated users can create groups" ON study_groups;
+DROP POLICY IF EXISTS "Owner can update group" ON study_groups;
+DROP POLICY IF EXISTS "Owner can delete group" ON study_groups;
+DROP POLICY IF EXISTS "Group members can view their groups" ON study_groups;
 
 CREATE POLICY "Authenticated users can create groups"
   ON study_groups FOR INSERT WITH CHECK (auth.uid() = owner_id);
@@ -139,8 +160,13 @@ CREATE TABLE IF NOT EXISTS group_members (
   PRIMARY KEY (group_id, user_id)
 );
 
+ALTER TABLE group_members DISABLE ROW LEVEL SECURITY;
 ALTER TABLE group_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE group_members REPLICA IDENTITY FULL;
+
+DROP POLICY IF EXISTS "Members can view group members" ON group_members;
+DROP POLICY IF EXISTS "Users can join groups" ON group_members;
+DROP POLICY IF EXISTS "Members can leave or be removed" ON group_members;
 
 CREATE POLICY "Members can view group members"
   ON group_members FOR SELECT
@@ -184,7 +210,12 @@ CREATE TABLE IF NOT EXISTS shared_content (
   )
 );
 
+ALTER TABLE shared_content DISABLE ROW LEVEL SECURITY;
 ALTER TABLE shared_content ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view relevant shared content" ON shared_content;
+DROP POLICY IF EXISTS "Users can send content" ON shared_content;
+DROP POLICY IF EXISTS "Sender can delete shared content" ON shared_content;
 
 CREATE POLICY "Users can view relevant shared content"
   ON shared_content FOR SELECT
@@ -214,8 +245,14 @@ CREATE TABLE IF NOT EXISTS messages (
   CHECK (sender_id <> recipient_id)
 );
 
+ALTER TABLE messages DISABLE ROW LEVEL SECURITY;
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE messages REPLICA IDENTITY FULL;
+
+DROP POLICY IF EXISTS "Users can view their own messages" ON messages;
+DROP POLICY IF EXISTS "Users can send messages to friends" ON messages;
+DROP POLICY IF EXISTS "Recipient can mark messages as read" ON messages;
+DROP POLICY IF EXISTS "Sender can delete messages" ON messages;
 
 CREATE POLICY "Users can view their own messages"
   ON messages FOR SELECT
@@ -259,8 +296,14 @@ CREATE TABLE IF NOT EXISTS notifications (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+ALTER TABLE notifications DISABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications REPLICA IDENTITY FULL;
+
+DROP POLICY IF EXISTS "Users can view their own notifications" ON notifications;
+DROP POLICY IF EXISTS "Any authenticated user can insert notifications" ON notifications;
+DROP POLICY IF EXISTS "Users can update own notifications" ON notifications;
+DROP POLICY IF EXISTS "Users can delete own notifications" ON notifications;
 
 CREATE POLICY "Users can view their own notifications"
   ON notifications FOR SELECT USING (auth.uid() = user_id);
@@ -278,8 +321,10 @@ CREATE POLICY "Users can delete own notifications"
 -- ============================================================
 -- Enable Realtime on social tables
 -- ============================================================
-ALTER PUBLICATION supabase_realtime ADD TABLE friendships;
-ALTER PUBLICATION supabase_realtime ADD TABLE messages;
-ALTER PUBLICATION supabase_realtime ADD TABLE notifications;
-ALTER PUBLICATION supabase_realtime ADD TABLE group_members;
-ALTER PUBLICATION supabase_realtime ADD TABLE shared_content;
+BEGIN;
+ALTER PUBLICATION supabase_realtime ADD TABLE IF NOT EXISTS friendships;
+ALTER PUBLICATION supabase_realtime ADD TABLE IF NOT EXISTS messages;
+ALTER PUBLICATION supabase_realtime ADD TABLE IF NOT EXISTS notifications;
+ALTER PUBLICATION supabase_realtime ADD TABLE IF NOT EXISTS group_members;
+ALTER PUBLICATION supabase_realtime ADD TABLE IF NOT EXISTS shared_content;
+COMMIT;
