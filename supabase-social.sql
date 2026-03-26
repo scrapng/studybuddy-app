@@ -320,18 +320,7 @@ CREATE POLICY "Users can delete own notifications"
 
 -- ============================================================
 -- Enable Realtime on social tables
+-- (Enable via Supabase Dashboard → Replication if needed)
 -- ============================================================
-ALTER PUBLICATION supabase_realtime DROP TABLE IF EXISTS friendships;
-ALTER PUBLICATION supabase_realtime ADD TABLE friendships;
-
-ALTER PUBLICATION supabase_realtime DROP TABLE IF EXISTS messages;
-ALTER PUBLICATION supabase_realtime ADD TABLE messages;
-
-ALTER PUBLICATION supabase_realtime DROP TABLE IF EXISTS notifications;
-ALTER PUBLICATION supabase_realtime ADD TABLE notifications;
-
-ALTER PUBLICATION supabase_realtime DROP TABLE IF EXISTS group_members;
-ALTER PUBLICATION supabase_realtime ADD TABLE group_members;
-
-ALTER PUBLICATION supabase_realtime DROP TABLE IF EXISTS shared_content;
-ALTER PUBLICATION supabase_realtime ADD TABLE shared_content;
+-- Note: Realtime can be enabled in Supabase Dashboard → Database → Replication
+-- Tables are created with REPLICA IDENTITY FULL for realtime support
