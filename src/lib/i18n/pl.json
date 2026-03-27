@@ -549,6 +549,20 @@
     "displayNamePlaceholder": "np. Tomasz",
     "displayNameUpdated": "Nazwa użytkownika zaktualizowana"
   },
+  "notifications": {
+    "title": "Powiadomienia",
+    "markAllRead": "Oznacz jako przeczytane",
+    "markAsRead": "Oznacz jako przeczytane",
+    "empty": "Brak powiadomień",
+    "allCaughtUp": "Wszystko przeczytane!"
+  },
+  "theme": {
+    "light": "Jasny",
+    "dark": "Ciemny",
+    "system": "Systemowy",
+    "lightMode": "Tryb jasny",
+    "darkMode": "Tryb ciemny"
+  },
   "landing": {
     "tagline": "Asystent nauki wspierany przez AI",
     "heroTitle1": "Ucz się mądrzej,",

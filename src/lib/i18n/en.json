@@ -549,6 +549,20 @@
     "displayNamePlaceholder": "e.g. Tomasz",
     "displayNameUpdated": "Display name updated"
   },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all read",
+    "markAsRead": "Mark as read",
+    "empty": "There are no notifications",
+    "allCaughtUp": "You're all caught up!"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "lightMode": "Light mode",
+    "darkMode": "Dark mode"
+  },
   "landing": {
     "tagline": "AI-powered study companion",
     "heroTitle1": "Study smarter,",

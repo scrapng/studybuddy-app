@@ -10,6 +10,7 @@ import {
 import { getRelativeTime } from '@/lib/utils'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
+import { useTranslation } from '@/hooks/useTranslation'
 import type { Notification } from '@/types/social'
 
 function NotificationIcon({ type }: { type: Notification['type'] }) {
@@ -32,6 +33,7 @@ function getNavTarget(n: Notification): string | null {
 
 export function NotificationsPanel({ dropUp = false }: { dropUp?: boolean }) {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const {
     notifications,
     unreadNotificationCount,
@@ -123,7 +125,7 @@ export function NotificationsPanel({ dropUp = false }: { dropUp?: boolean }) {
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b shrink-0">
-            <h3 className="font-semibold text-sm">Notifications</h3>
+            <h3 className="font-semibold text-sm">{t.notifications.title}</h3>
             {unreadNotificationCount > 0 && (
               <Button
                 variant="ghost"
@@ -132,7 +134,7 @@ export function NotificationsPanel({ dropUp = false }: { dropUp?: boolean }) {
                 onClick={handleMarkAllRead}
               >
                 <CheckCheck className="h-3.5 w-3.5" />
-                Mark all read
+                {t.notifications.markAllRead}
               </Button>
             )}
           </div>
@@ -142,8 +144,8 @@ export function NotificationsPanel({ dropUp = false }: { dropUp?: boolean }) {
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
                 <Bell className="h-8 w-8 text-muted-foreground/40" />
-                <p className="text-sm font-medium text-muted-foreground">There are no notifications</p>
-                <p className="text-xs text-muted-foreground/60">You're all caught up!</p>
+                <p className="text-sm font-medium text-muted-foreground">{t.notifications.empty}</p>
+                <p className="text-xs text-muted-foreground/60">{t.notifications.allCaughtUp}</p>
               </div>
             ) : (
               <div className="divide-y">
@@ -174,7 +176,7 @@ export function NotificationsPanel({ dropUp = false }: { dropUp?: boolean }) {
                           size="icon"
                           className="h-6 w-6"
                           onClick={e => handleMarkRead(n, e)}
-                          title="Mark as read"
+                          title={t.notifications.markAsRead}
                         >
                           <Check className="h-3 w-3" />
                         </Button>
@@ -184,7 +186,7 @@ export function NotificationsPanel({ dropUp = false }: { dropUp?: boolean }) {
                         size="icon"
                         className="h-6 w-6 text-muted-foreground hover:text-destructive"
                         onClick={e => handleDelete(n, e)}
-                        title="Delete"
+                        title={t.common.delete}
                       >
                         <Trash2 className="h-3 w-3" />
                       </Button>
