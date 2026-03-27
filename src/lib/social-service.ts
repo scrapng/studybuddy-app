@@ -43,6 +43,15 @@ export async function getOrCreateProfile(userId: string): Promise<Profile | null
   return inserted as Profile
 }
 
+export async function updateDisplayName(userId: string, displayName: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('profiles')
+    .update({ display_name: displayName.trim() || null })
+    .eq('id', userId)
+  if (error) { console.error('Error updating display name:', error.message); return false }
+  return true
+}
+
 export async function getProfileByFriendCode(code: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from('profiles')

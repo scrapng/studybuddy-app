@@ -31,7 +31,19 @@
       "Bash(npx vite build)",
       "Bash(npm install @supabase/supabase-js)",
       "Bash(npm install @supabase/supabase-js helmet express-rate-limit)",
-      "Bash(timeout 5 node index.js)"
+      "Bash(timeout 5 node index.js)",
+      "Bash(gh auth:*)",
+      "Bash(winget install:*)",
+      "Bash(export PATH=\"/c/Program Files/GitHub CLI:$PATH\")",
+      "Bash(gh repo:*)",
+      "Bash(node -e \"console.log\\(''server ok''\\)\")",
+      "Bash(npm ls:*)",
+      "Bash(curl -s -X POST http://localhost:3001/api/ai/ocr -H \"Content-Type: application/json\" -d '{\"\"\"\"imageData\"\"\"\":\"\"\"\"data:image/png;base64,iVBORw0KGgo=\"\"\"\"}')",
+      "Bash(npx tsc:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(xargs grep:*)"
     ]
   }
 }

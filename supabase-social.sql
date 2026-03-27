@@ -19,7 +19,7 @@ $$ LANGUAGE plpgsql;
 -- ============================================================
 CREATE TABLE IF NOT EXISTS profiles (
   id           UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  friend_code  CHAR(8) NOT NULL UNIQUE,
+  friend_code  TEXT NOT NULL UNIQUE,
   display_name TEXT,
   avatar_color TEXT NOT NULL DEFAULT '#6366f1',
   created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -43,25 +43,27 @@ CREATE POLICY "Users can update own profile"
   ON profiles FOR UPDATE USING (auth.uid() = id);
 
 -- Auto-create profile with unique friend code on new user signup
--- Drop trigger first (it depends on the function), then drop function
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-DROP FUNCTION IF EXISTS create_profile_on_signup();
+-- Drop function with CASCADE to automatically drop dependent trigger
+DROP FUNCTION IF EXISTS create_profile_on_signup() CASCADE;
 CREATE OR REPLACE FUNCTION create_profile_on_signup()
 RETURNS TRIGGER AS $$
-DECLARE code CHAR(8);
+DECLARE
+  code TEXT;
 BEGIN
   LOOP
     code := upper(substring(md5(random()::text || clock_timestamp()::text) FROM 1 FOR 8));
-    EXIT WHEN NOT EXISTS (SELECT 1 FROM profiles WHERE friend_code = code);
+    EXIT WHEN NOT EXISTS (SELECT 1 FROM public.profiles WHERE friend_code = code);
   END LOOP;
-  INSERT INTO profiles (id, friend_code)
+  INSERT INTO public.profiles (id, friend_code)
   VALUES (NEW.id, code)
   ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
+EXCEPTION WHEN OTHERS THEN
+  -- Never block signup even if profile creation fails
+  RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION create_profile_on_signup();
@@ -129,7 +131,7 @@ CREATE TABLE IF NOT EXISTS study_groups (
   name        TEXT NOT NULL,
   description TEXT,
   owner_id    UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  invite_code CHAR(8) NOT NULL UNIQUE,
+  invite_code TEXT NOT NULL UNIQUE,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

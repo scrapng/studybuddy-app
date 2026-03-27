@@ -7,6 +7,7 @@ import {
   getPendingRequests,
   getSentRequests,
   getNotifications,
+  updateDisplayName as updateDisplayNameService,
 } from '@/lib/social-service'
 import type { Profile, Friend, Friendship, Notification, Message } from '@/types/social'
 
@@ -35,6 +36,7 @@ interface SocialContextValue extends SocialState {
   removeFriendLocal: (friendshipId: string) => void
   addLastMessage: (friendId: string, msg: Message) => void
   clearUnreadCount: (friendId: string) => void
+  updateDisplayName: (name: string) => Promise<void>
 }
 
 const SocialContext = createContext<SocialContextValue | null>(null)
@@ -70,13 +72,22 @@ export function SocialProvider({ children }: { children: ReactNode }) {
     const userId = user.id
 
     async function init() {
-      const [profile, friends, pendingIncoming, pendingSent, notifications] = await Promise.all([
+      let [profile, friends, pendingIncoming, pendingSent, notifications] = await Promise.all([
         getOrCreateProfile(userId),
         getFriends(userId),
         getPendingRequests(userId),
         getSentRequests(userId),
         getNotifications(userId),
       ])
+
+      // If profile has no display_name but user signed up with one, save it now
+      if (profile && !profile.display_name) {
+        const metaName = user?.user_metadata?.display_name as string | undefined
+        if (metaName?.trim()) {
+          await updateDisplayNameService(userId, metaName.trim())
+          profile = { ...profile, display_name: metaName.trim() }
+        }
+      }
 
       setState(s => ({
         ...s,
@@ -278,6 +289,12 @@ export function SocialProvider({ children }: { children: ReactNode }) {
     }))
   }
 
+  async function updateDisplayName(name: string) {
+    if (!state.profile) return
+    await updateDisplayNameService(state.profile.id, name)
+    setState(s => s.profile ? { ...s, profile: { ...s.profile!, display_name: name.trim() || null } } : s)
+  }
+
   async function refreshFriends() {
     if (!user?.id) return
     const [friends, pendingIncoming, pendingSent] = await Promise.all([
@@ -310,6 +327,7 @@ export function SocialProvider({ children }: { children: ReactNode }) {
         removeFriendLocal,
         addLastMessage,
         clearUnreadCount,
+        updateDisplayName,
       }}
     >
       {children}

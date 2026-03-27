@@ -30,7 +30,7 @@ function getNavTarget(n: Notification): string | null {
   return null
 }
 
-export function NotificationsPanel() {
+export function NotificationsPanel({ dropUp = false }: { dropUp?: boolean }) {
   const navigate = useNavigate()
   const {
     notifications,
@@ -100,7 +100,10 @@ export function NotificationsPanel() {
       </Button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1 w-80 max-h-[480px] flex flex-col bg-card border rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className={cn(
+          "absolute right-0 w-80 max-h-[480px] flex flex-col bg-card border rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in duration-200",
+          dropUp ? "bottom-full mb-1 slide-in-from-bottom-2" : "top-full mt-1 slide-in-from-top-2"
+        )}>
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b shrink-0">
             <h3 className="font-semibold text-sm">Notifications</h3>

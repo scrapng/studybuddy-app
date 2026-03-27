@@ -13,12 +13,14 @@ import { formatDuration, getRelativeTime, daysUntil } from '@/lib/utils'
 import { getStudyRecommendation } from '@/lib/spaced-repetition'
 import { getUnlockedAchievements, ACHIEVEMENTS, type AchievementData } from '@/lib/achievements'
 import { TutorialDialog } from '@/components/shared/TutorialDialog'
+import { useSocialContext } from '@/contexts/SocialContext'
 
 export function DashboardPage() {
   const { subjects, stats, sessions } = useSubjects()
   const { state } = useSubjectsContext()
   const { user } = useAuth()
   const { t } = useTranslation()
+  const { profile } = useSocialContext()
   const recentSessions = [...sessions].sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()).slice(0, 5)
 
   const [tutorialOpen, setTutorialOpen] = useState(false)
@@ -75,10 +77,10 @@ export function DashboardPage() {
         <div>
           <h1 className="text-2xl font-bold">{(() => {
             const hour = new Date().getHours()
-            if (hour < 12) return t.dashboard.goodMorning
-            if (hour < 18) return t.dashboard.goodAfternoon
-            return t.dashboard.goodEvening
-          })()}!</h1>
+            const greeting = hour < 12 ? t.dashboard.goodMorning : hour < 18 ? t.dashboard.goodAfternoon : t.dashboard.goodEvening
+            const name = profile?.display_name
+            return name ? `${greeting}, ${name}!` : `${greeting}!`
+          })()}</h1>
           <p className="text-muted-foreground">{t.dashboard.greeting}</p>
         </div>
         <Button variant="ghost" size="sm" onClick={() => setTutorialOpen(true)} className="gap-1.5 text-muted-foreground">

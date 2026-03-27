@@ -14,6 +14,7 @@ import { LanguageToggle } from '@/components/layout/LanguageToggle'
 export function SignUpPage() {
   const { signUp, user, loading } = useAuth()
   const { t } = useTranslation()
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -41,7 +42,7 @@ export function SignUpPage() {
     }
 
     setIsSubmitting(true)
-    const result = await signUp(email, password)
+    const result = await signUp(email, password, name)
     if (result.error) {
       setError(result.error)
     } else {
@@ -93,6 +94,17 @@ export function SignUpPage() {
         <Card className="glass-card">
           <CardContent className="pt-6 space-y-4">
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">{t.auth.displayName}</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder={t.auth.displayNamePlaceholder}
+                  autoComplete="name"
+                />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="email">{t.auth.email}</Label>
                 <Input
