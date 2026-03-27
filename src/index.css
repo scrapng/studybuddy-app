@@ -123,7 +123,7 @@
   html {
     @apply font-sans scroll-smooth;
     /* Fallback background so no white flashes on iOS Safari safe areas */
-    background: #dff0fd;
+    background: #eef6fc;
     }
   html.dark {
     background: #03060f;
@@ -544,16 +544,6 @@
   animation: float 3s ease-in-out infinite;
 }
 
-/* ===== SKY BACKGROUND ===== */
-@keyframes cloud-drift {
-  from { transform: translateX(-320px); }
-  to   { transform: translateX(calc(100vw + 320px)); }
-}
-
-.sky-cloud {
-  animation: cloud-drift linear infinite;
-  will-change: transform;
-}
 
 /* Theme toggle icon spin */
 @keyframes spin-once {

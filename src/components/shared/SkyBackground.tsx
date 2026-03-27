@@ -225,69 +225,8 @@ function DaySky() {
     <div
       className="absolute inset-0"
       style={{
-        background: 'linear-gradient(to bottom, #1a6fcf 0%, #3b9de8 25%, #70c2f5 55%, #b8e1fa 80%, #dff0fd 100%)',
+        background: 'linear-gradient(to bottom, #b8d8f0 0%, #cce4f5 40%, #ddeef9 70%, #eef6fc 100%)',
       }}
-    >
-      {/* Sun glow */}
-      <div
-        className="absolute"
-        style={{
-          top: '-5%', right: '10%',
-          width: '30vw', height: '30vw',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(255,240,130,0.45) 0%, rgba(255,210,80,0.2) 35%, transparent 70%)',
-          filter: 'blur(8px)',
-        }}
-      />
-      {/* Sun body */}
-      <div
-        className="absolute"
-        style={{
-          top: '3%', right: '14%',
-          width: '7vw', height: '7vw',
-          minWidth: 50, minHeight: 50,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle at 38% 35%, #fffde0, #ffe050 45%, #ffb800)',
-          boxShadow: '0 0 40px 15px rgba(255,220,60,0.35), 0 0 80px 30px rgba(255,180,0,0.15)',
-        }}
-      />
-      {/* Clouds */}
-      <CloudShape delay={0} duration={50} top="8%" scale={1.4} opacity={0.95} />
-      <CloudShape delay={-15} duration={65} top="18%" scale={0.9} opacity={0.88} />
-      <CloudShape delay={-30} duration={45} top="28%" scale={1.1} opacity={0.82} />
-      <CloudShape delay={-8} duration={72} top="12%" scale={1.7} opacity={0.75} />
-      <CloudShape delay={-42} duration={55} top="35%" scale={0.75} opacity={0.7} />
-      <CloudShape delay={-25} duration={60} top="22%" scale={1.0} opacity={0.65} />
-    </div>
-  )
-}
-
-function CloudShape({ delay, duration, top, scale, opacity }: {
-  delay: number
-  duration: number
-  top: string
-  scale: number
-  opacity: number
-}) {
-  return (
-    <div
-      className="sky-cloud absolute"
-      style={{
-        top,
-        width: `${Math.round(220 * scale)}px`,
-        height: `${Math.round(70 * scale)}px`,
-        opacity,
-        animationDuration: `${duration}s`,
-        animationDelay: `${delay}s`,
-      }}
-    >
-      <svg viewBox="0 0 220 70" fill="white" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
-        <ellipse cx="110" cy="50" rx="100" ry="22" />
-        <ellipse cx="75" cy="36" rx="55" ry="34" />
-        <ellipse cx="135" cy="33" rx="50" ry="32" />
-        <ellipse cx="170" cy="46" rx="38" ry="22" />
-        <ellipse cx="48" cy="46" rx="38" ry="22" />
-      </svg>
-    </div>
+    />
   )
 }
