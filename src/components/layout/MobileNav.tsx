@@ -41,7 +41,7 @@ export function MobileNav() {
   ]
 
   return (
-    <div className="lg:hidden flex items-center justify-between border-b px-4 py-3 glass-nav sticky top-0 z-50">
+    <div className="lg:hidden flex items-center justify-between border-b px-4 py-3 glass-nav sticky top-0 z-50" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
       <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
         <AppLogo className="h-6 w-6" />
         <span className="font-bold text-lg">{t.app.name}</span>

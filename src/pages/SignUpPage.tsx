@@ -53,8 +53,8 @@ export function SignUpPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
-        <div className="absolute top-4 right-4 flex items-center gap-1">
+      <div className="min-h-dvh flex flex-col items-center justify-center bg-background p-4">
+        <div className="absolute right-4 flex items-center gap-1" style={{ top: 'max(1rem, env(safe-area-inset-top))' }}>
           <ThemeToggle />
           <LanguageToggle />
         </div>
@@ -74,9 +74,9 @@ export function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
+    <div className="min-h-dvh flex flex-col items-center justify-center bg-background p-4">
       {/* Top-right controls */}
-      <div className="absolute top-4 right-4 flex items-center gap-1">
+      <div className="absolute right-4 flex items-center gap-1" style={{ top: 'max(1rem, env(safe-area-inset-top))' }}>
         <ThemeToggle />
         <LanguageToggle />
       </div>

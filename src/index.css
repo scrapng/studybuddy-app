@@ -120,12 +120,22 @@
   * {
     @apply border-border outline-ring/50;
     }
+  html {
+    @apply font-sans scroll-smooth;
+    /* Fallback background so no white flashes on iOS Safari safe areas */
+    background: #dff0fd;
+    }
+  html.dark {
+    background: #03060f;
+    }
   body {
     @apply text-foreground;
     background: transparent;
+    /* Fill iOS safe areas (notch + home bar) with the same background */
+    min-height: 100dvh;
     }
-  html {
-    @apply font-sans scroll-smooth;
+  #root {
+    min-height: 100dvh;
     }
 }
 
