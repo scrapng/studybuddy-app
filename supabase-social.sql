@@ -22,8 +22,12 @@ CREATE TABLE IF NOT EXISTS profiles (
   friend_code  TEXT NOT NULL UNIQUE,
   display_name TEXT,
   avatar_color TEXT NOT NULL DEFAULT '#6366f1',
+  language     TEXT,
   created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Add language column if upgrading from older schema
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS language TEXT;
 
 -- Drop and recreate RLS if it exists
 ALTER TABLE profiles DISABLE ROW LEVEL SECURITY;

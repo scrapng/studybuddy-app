@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from '
 import type { AppSettings } from '@/types'
 import type { Language } from '@/lib/i18n'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
+import { supabase } from '@/lib/supabase'
 
 const STORAGE_KEY = 'studybuddy-settings'
 
@@ -21,7 +22,7 @@ function loadSettings(): AppSettings {
 interface SettingsContextType {
   settings: AppSettings
   setTheme: (theme: AppSettings['theme']) => void
-  setLanguage: (language: Language) => void
+  setLanguage: (language: Language) => Promise<void>
   toggleSidebar: () => void
 }
 
@@ -52,7 +53,13 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   }, [settings])
 
   const setTheme = (theme: AppSettings['theme']) => setSettings(s => ({ ...s, theme }))
-  const setLanguage = (language: Language) => setSettings(s => ({ ...s, language }))
+  const setLanguage = async (language: Language) => {
+    setSettings(s => ({ ...s, language }))
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      await supabase.from('profiles').update({ language }).eq('id', user.id)
+    }
+  }
   const toggleSidebar = () => setSettings(s => ({ ...s, sidebarCollapsed: !s.sidebarCollapsed }))
 
   return (

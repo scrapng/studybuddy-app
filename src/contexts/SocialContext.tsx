@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useSettingsContext } from '@/contexts/SettingsContext'
 import { supabase } from '@/lib/supabase'
 import {
   getOrCreateProfile,
@@ -49,6 +50,7 @@ export function useSocialContext(): SocialContextValue {
 
 export function SocialProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
+  const { setLanguage } = useSettingsContext()
   const [state, setState] = useState<SocialState>({
     profile: null,
     friends: [],
@@ -79,6 +81,11 @@ export function SocialProvider({ children }: { children: ReactNode }) {
         getSentRequests(userId),
         getNotifications(userId),
       ])
+
+      // Apply saved language preference from profile
+      if (profile?.language) {
+        setLanguage(profile.language as import('@/lib/i18n').Language)
+      }
 
       // If profile has no display_name but user signed up with one, save it now
       if (profile && !profile.display_name) {
