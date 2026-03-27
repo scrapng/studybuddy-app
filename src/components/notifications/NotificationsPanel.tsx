@@ -39,7 +39,20 @@ export function NotificationsPanel({ dropUp = false }: { dropUp?: boolean }) {
     markAllNotificationsReadLocal,
   } = useSocialContext()
   const [open, setOpen] = useState(false)
+  const [fixedPos, setFixedPos] = useState({ bottom: 0, left: 0 })
   const containerRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+
+  function handleToggle() {
+    if (!open && dropUp && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect()
+      setFixedPos({
+        bottom: window.innerHeight - rect.top + 4,
+        left: rect.left,
+      })
+    }
+    setOpen(v => !v)
+  }
 
   // Close on click outside
   useEffect(() => {
@@ -86,10 +99,11 @@ export function NotificationsPanel({ dropUp = false }: { dropUp?: boolean }) {
   return (
     <div ref={containerRef} className="relative">
       <Button
+        ref={buttonRef}
         variant="ghost"
         size="icon"
         className="h-9 w-9 relative"
-        onClick={() => setOpen(v => !v)}
+        onClick={handleToggle}
       >
         <Bell className="h-4 w-4" />
         {unreadNotificationCount > 0 && (
@@ -100,10 +114,13 @@ export function NotificationsPanel({ dropUp = false }: { dropUp?: boolean }) {
       </Button>
 
       {open && (
-        <div className={cn(
-          "absolute right-0 w-80 max-h-[480px] flex flex-col bg-card border rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in duration-200",
-          dropUp ? "bottom-full mb-1 slide-in-from-bottom-2" : "top-full mt-1 slide-in-from-top-2"
-        )}>
+        <div
+          className="w-80 max-h-[480px] flex flex-col bg-card border rounded-xl shadow-xl z-[9999] overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200"
+          style={dropUp
+            ? { position: 'fixed', bottom: fixedPos.bottom, left: fixedPos.left }
+            : { position: 'absolute', top: '100%', right: 0, marginTop: 4 }
+          }
+        >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b shrink-0">
             <h3 className="font-semibold text-sm">Notifications</h3>
