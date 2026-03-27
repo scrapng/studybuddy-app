@@ -103,7 +103,7 @@ router.post('/ocr', async (req, res) => {
 
     const response = await getOpenAIClient().chat.completions.create({
       model: VISION_MODEL,
-      max_tokens: 4096,
+      max_completion_tokens: 4096,
       messages: [
         {
           role: 'user',
@@ -154,7 +154,7 @@ router.post('/enhance-ocr-text', async (req, res) => {
 
     const response = await getOpenAIClient().chat.completions.create({
       model: MODEL,
-      max_tokens: 4096,
+      max_completion_tokens: 4096,
       messages: [
         {
           role: 'system',
@@ -205,7 +205,7 @@ router.post('/enhance-notes', async (req, res) => {
 
     const response = await getOpenAIClient().chat.completions.create({
       model: MODEL,
-      max_tokens: 4096,
+      max_completion_tokens: 4096,
       messages: [
         {
           role: 'system',
@@ -249,7 +249,7 @@ router.post('/generate-quiz', async (req, res) => {
 
     const response = await getOpenAIClient().chat.completions.create({
       model: MODEL,
-      max_tokens: 4096,
+      max_completion_tokens: 4096,
       messages: [
         {
           role: 'system',
@@ -257,7 +257,14 @@ router.post('/generate-quiz', async (req, res) => {
         },
         {
           role: 'user',
-          content: `Based on these study notes, generate ${numQuestions} quiz questions. Return them as a JSON array with this structure: [{"type": "multiple-choice" or "true-false" or "short-answer", "question": "...", "options": ["A", "B", "C", "D"] (for multiple-choice only), "answer": "..."}]
+          content: `Based on these study notes, generate ${numQuestions} quiz questions as a JSON array.
+
+Rules:
+- "multiple-choice": include "options" array with exactly 4 answer choices (full text, not letters). "answer" must exactly match one of the options.
+- "true-false": NO "options" field. "answer" must be exactly "True" or "False".
+- "short-answer": NO "options" field. "answer" is a short text.
+
+Structure: [{"type": "multiple-choice"|"true-false"|"short-answer", "question": "...", "options": [...] (multiple-choice only), "answer": "...", "explanation": "..."}]
 
 Study notes:
 ${notesText}
@@ -279,8 +286,22 @@ Return ONLY valid JSON, no markdown or extra text.`
       console.warn('Failed to parse quiz questions JSON, returning empty array')
     }
 
+    // Normalize: ensure true-false questions never have 4 options, and
+    // questions whose answer is True/False are forced to true-false type
+    const normalized = questions.map(q => {
+      const ans = (q.answer || '').trim()
+      const isTrueFalse = ans === 'True' || ans === 'False'
+      if (isTrueFalse) {
+        return { ...q, type: 'true-false', options: undefined }
+      }
+      if (q.type === 'true-false') {
+        return { ...q, options: undefined }
+      }
+      return q
+    })
+
     res.json({
-      questions,
+      questions: normalized,
       success: true
     })
   } catch (error) {
@@ -308,7 +329,7 @@ router.post('/generate-flashcards', async (req, res) => {
 
     const response = await getOpenAIClient().chat.completions.create({
       model: MODEL,
-      max_tokens: 4096,
+      max_completion_tokens: 4096,
       messages: [
         {
           role: 'system',

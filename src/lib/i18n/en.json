@@ -1,5 +1,7 @@
 {
-  "app": { "name": "NoteBuddy" },
+  "app": {
+    "name": "NoteBuddy"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "subjects": "Subjects",
@@ -11,7 +13,10 @@
     "groups": "Groups",
     "settings": "Settings"
   },
-  "lang": { "english": "English", "polish": "Polski" },
+  "lang": {
+    "english": "English",
+    "polish": "Polski"
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",
@@ -438,7 +443,9 @@
     "shortAnswer": "Short Answer",
     "fillBlank": "Fill in the Blank",
     "fillBlankPlaceholder": "Fill in the blank...",
-    "typeAnswerPlaceholder": "Type your answer..."
+    "typeAnswerPlaceholder": "Type your answer...",
+    "trueOption": "True",
+    "falseOption": "False"
   },
   "study": {
     "setNotFound": "Study set not found.",

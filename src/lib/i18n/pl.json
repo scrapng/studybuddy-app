@@ -1,5 +1,7 @@
 {
-  "app": { "name": "NoteBuddy" },
+  "app": {
+    "name": "NoteBuddy"
+  },
   "nav": {
     "dashboard": "Pulpit",
     "subjects": "Przedmioty",
@@ -11,7 +13,10 @@
     "groups": "Grupy",
     "settings": "Ustawienia"
   },
-  "lang": { "english": "English", "polish": "Polski" },
+  "lang": {
+    "english": "English",
+    "polish": "Polski"
+  },
   "common": {
     "save": "Zapisz",
     "cancel": "Anuluj",
@@ -438,7 +443,9 @@
     "shortAnswer": "Krótka odpowiedź",
     "fillBlank": "Uzupełnij lukę",
     "fillBlankPlaceholder": "Uzupełnij lukę...",
-    "typeAnswerPlaceholder": "Wpisz odpowiedź..."
+    "typeAnswerPlaceholder": "Wpisz odpowiedź...",
+    "trueOption": "Prawda",
+    "falseOption": "Fałsz"
   },
   "study": {
     "setNotFound": "Nie znaleziono zestawu nauki.",
