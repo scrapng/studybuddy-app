@@ -3,8 +3,8 @@ import OpenAI from 'openai'
 
 const router = express.Router()
 
-const MODEL = 'gpt-4o-mini'
-const VISION_MODEL = 'gpt-4o'
+const MODEL = 'gpt-5.4-nano'
+const VISION_MODEL = 'gpt-5.4-nano'
 
 // Lazy-load OpenAI client - don't instantiate until environment is ready
 let openai = null
