@@ -225,7 +225,7 @@ function DaySky() {
     <div
       className="absolute inset-0"
       style={{
-        background: 'linear-gradient(to bottom, #b8d8f0 0%, #cce4f5 40%, #ddeef9 70%, #eef6fc 100%)',
+        background: 'linear-gradient(to bottom, #3a9bd5 0%, #5bb3e8 25%, #a8d8f5 50%, #d6eefa 75%, #f0f8ff 100%)',
       }}
     />
   )

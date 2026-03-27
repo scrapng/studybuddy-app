@@ -123,7 +123,7 @@
   html {
     @apply font-sans scroll-smooth;
     /* Fallback background so no white flashes on iOS Safari safe areas */
-    background: #eef6fc;
+    background: #f0f8ff;
     }
   html.dark {
     background: #03060f;
