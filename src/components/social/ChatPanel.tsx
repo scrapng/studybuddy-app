@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, type ReactNode } from 'react'
 import { Send, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,9 +14,10 @@ import { cn } from '@/lib/utils'
 interface Props {
   friend: Friend
   onBack?: () => void
+  mobileBackButton?: ReactNode
 }
 
-export function ChatPanel({ friend, onBack }: Props) {
+export function ChatPanel({ friend, onBack, mobileBackButton }: Props) {
   const { user } = useAuth()
   const { addLastMessage, clearUnreadCount } = useSocialContext()
   const [messages, setMessages] = useState<Message[]>([])
@@ -93,6 +94,7 @@ export function ChatPanel({ friend, onBack }: Props) {
     <div className="flex flex-col h-full min-h-0">
       {/* Header */}
       <div className="flex items-center gap-3 p-3 border-b shrink-0">
+        {mobileBackButton}
         {onBack && (
           <Button variant="ghost" size="icon" onClick={onBack} className="h-8 w-8 shrink-0">
             <ArrowLeft className="h-4 w-4" />

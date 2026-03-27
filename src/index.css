@@ -121,7 +121,8 @@
     @apply border-border outline-ring/50;
     }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: transparent;
     }
   html {
     @apply font-sans scroll-smooth;
@@ -531,6 +532,17 @@
 
 .animate-float {
   animation: float 3s ease-in-out infinite;
+}
+
+/* ===== SKY BACKGROUND ===== */
+@keyframes cloud-drift {
+  from { transform: translateX(-320px); }
+  to   { transform: translateX(calc(100vw + 320px)); }
+}
+
+.sky-cloud {
+  animation: cloud-drift linear infinite;
+  will-change: transform;
 }
 
 /* Theme toggle icon spin */

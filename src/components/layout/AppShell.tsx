@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { useGlowEffect } from '@/hooks/useGlowEffect'
 import { useThemeShortcut } from '@/hooks/useThemeShortcut'
 import { ThemeToast } from '@/components/shared/ThemeToast'
+import { SkyBackground } from '@/components/shared/SkyBackground'
 
 export function AppShell() {
   const location = useLocation()
@@ -12,7 +13,8 @@ export function AppShell() {
   const themeToast = useThemeShortcut()
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-screen overflow-hidden">
+      <SkyBackground />
       <Sidebar />
       <div className="flex-1 flex flex-col h-full overflow-y-auto">
         <MobileNav />

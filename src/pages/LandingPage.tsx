@@ -5,6 +5,7 @@ import { AppLogo } from '@/components/shared/AppLogo'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { LanguageToggle } from '@/components/layout/LanguageToggle'
 import { useTranslation } from '@/hooks/useTranslation'
+import { SkyBackground } from '@/components/shared/SkyBackground'
 
 export function LandingPage() {
   const { t } = useTranslation()
@@ -25,7 +26,8 @@ export function LandingPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
+    <div className="min-h-screen overflow-hidden">
+      <SkyBackground />
       {/* Nav */}
       <header className="fixed top-0 w-full z-50 backdrop-blur-md bg-background/80 border-b">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
