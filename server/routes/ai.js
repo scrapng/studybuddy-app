@@ -3,8 +3,8 @@ import OpenAI from 'openai'
 
 const router = express.Router()
 
-const MODEL = 'gpt-4o-mini'
-const VISION_MODEL = 'gpt-4o-mini'
+const MODEL = 'gpt-5.4-nano-2026-03-17'
+const VISION_MODEL = 'gpt-5.4-nano-2026-03-17'
 
 // Lazy-load OpenAI client - don't instantiate until environment is ready
 let openai = null
@@ -76,6 +76,29 @@ function getLanguageInstruction(language, subjectName) {
   return `IMPORTANT: Respond entirely in ${langName}. All text, explanations, and content must be in ${langName}.`
 }
 
+/**
+ * Call OpenAI Responses API. Uses gpt-5.4-nano with reasoning: none for fast responses.
+ */
+async function callAI(systemPrompt, userContent, { model = MODEL, maxTokens = 4096 } = {}) {
+  const input = []
+  if (systemPrompt) {
+    input.push({ role: 'developer', content: systemPrompt })
+  }
+  if (Array.isArray(userContent)) {
+    input.push({ role: 'user', content: userContent })
+  } else {
+    input.push({ role: 'user', content: userContent })
+  }
+
+  const response = await getOpenAIClient().responses.create({
+    model,
+    input,
+    max_output_tokens: maxTokens,
+  })
+
+  return response.output_text || ''
+}
+
 // Validate API key is configured
 router.use((req, res, next) => {
   if (!process.env.OPENAI_API_KEY) {
@@ -84,7 +107,7 @@ router.use((req, res, next) => {
   next()
 })
 
-// OCR: Extract text from image using GPT-4o Vision
+// OCR: Extract text from image using GPT-5.4-nano Vision
 router.post('/ocr', async (req, res) => {
   try {
     const { imageData, language, subjectName } = req.body
@@ -101,30 +124,17 @@ router.post('/ocr', async (req, res) => {
     const langInstruction = getLanguageInstruction(language, subjectName)
     const langNote = langInstruction ? `\n\n${langInstruction}` : ''
 
-    const response = await getOpenAIClient().chat.completions.create({
-      model: VISION_MODEL,
-      max_completion_tokens: 4096,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'image_url',
-              image_url: {
-                url: imageUrl,
-                detail: 'high'
-              }
-            },
-            {
-              type: 'text',
-              text: `Please extract ALL text from this image of handwritten or printed notes. Preserve the original structure, headings, bullet points, and formatting as much as possible. If the handwriting is unclear, make your best interpretation. Return ONLY the extracted text, no explanations or commentary.${langNote}`
-            }
-          ]
-        }
-      ]
-    })
-
-    const text = response.choices[0]?.message?.content || ''
+    const text = await callAI(null, [
+      {
+        type: 'input_image',
+        image_url: imageUrl,
+        detail: 'high'
+      },
+      {
+        type: 'input_text',
+        text: `Please extract ALL text from this image of handwritten or printed notes. Preserve the original structure, headings, bullet points, and formatting as much as possible. If the handwriting is unclear, make your best interpretation. Return ONLY the extracted text, no explanations or commentary.${langNote}`
+      }
+    ], { model: VISION_MODEL })
 
     res.json({
       text,
@@ -152,22 +162,10 @@ router.post('/enhance-ocr-text', async (req, res) => {
     const langInstruction = getLanguageInstruction(language, subjectName)
     const systemPrompt = `You are a text cleanup assistant. Fix OCR errors, typos, and formatting issues while preserving the original meaning and structure.${langInstruction ? ' ' + langInstruction : ''}`
 
-    const response = await getOpenAIClient().chat.completions.create({
-      model: MODEL,
-      max_completion_tokens: 4096,
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt
-        },
-        {
-          role: 'user',
-          content: `This is raw OCR text that may have errors. Please clean it up, fix typos, and make it readable. Return only the cleaned text:\n\n${text}`
-        }
-      ]
-    })
-
-    const cleanedText = response.choices[0]?.message?.content || ''
+    const cleanedText = await callAI(
+      systemPrompt,
+      `This is raw OCR text that may have errors. Please clean it up, fix typos, and make it readable. Return only the cleaned text:\n\n${text}`
+    )
 
     res.json({
       text: cleanedText,
@@ -203,22 +201,10 @@ router.post('/enhance-notes', async (req, res) => {
     const prompt = modePrompts[mode] || modePrompts.simplify
     const langInstruction = getLanguageInstruction(language, subjectName)
 
-    const response = await getOpenAIClient().chat.completions.create({
-      model: MODEL,
-      max_completion_tokens: 4096,
-      messages: [
-        {
-          role: 'system',
-          content: `You are a helpful study assistant. Your task is to enhance study notes. ${prompt}${langInstruction ? '\n\n' + langInstruction : ''}`
-        },
-        {
-          role: 'user',
-          content: `Please enhance the following notes:\n\n${content}`
-        }
-      ]
-    })
-
-    const enhanced = response.choices[0]?.message?.content || ''
+    const enhanced = await callAI(
+      `You are a helpful study assistant. Your task is to enhance study notes. ${prompt}${langInstruction ? '\n\n' + langInstruction : ''}`,
+      `Please enhance the following notes:\n\n${content}`
+    )
 
     res.json({
       enhanced,
@@ -247,17 +233,9 @@ router.post('/generate-quiz', async (req, res) => {
     const numQuestions = Math.min(parseInt(count) || 5, 20)
     const langInstruction = getLanguageInstruction(language, subjectName)
 
-    const response = await getOpenAIClient().chat.completions.create({
-      model: MODEL,
-      max_completion_tokens: 4096,
-      messages: [
-        {
-          role: 'system',
-          content: `You are a quiz generator. Generate quiz questions from study notes. Always return valid JSON arrays.${langInstruction ? '\n\n' + langInstruction : ''}`
-        },
-        {
-          role: 'user',
-          content: `Based on these study notes, generate ${numQuestions} quiz questions as a JSON array.
+    const responseText = await callAI(
+      `You are a quiz generator. Generate quiz questions from study notes. Always return valid JSON arrays.${langInstruction ? '\n\n' + langInstruction : ''}`,
+      `Based on these study notes, generate ${numQuestions} quiz questions as a JSON array.
 
 Rules:
 - "multiple-choice": include "options" array with exactly 4 answer choices (full text, not letters). "answer" must exactly match one of the options.
@@ -270,11 +248,7 @@ Study notes:
 ${notesText}
 
 Return ONLY valid JSON, no markdown or extra text.`
-        }
-      ]
-    })
-
-    const responseText = response.choices[0]?.message?.content || '[]'
+    )
 
     // Parse the JSON response
     let questions = []
@@ -327,27 +301,15 @@ router.post('/generate-flashcards', async (req, res) => {
     const numFlashcards = Math.min(parseInt(count) || 5, 20)
     const langInstruction = getLanguageInstruction(language, subjectName)
 
-    const response = await getOpenAIClient().chat.completions.create({
-      model: MODEL,
-      max_completion_tokens: 4096,
-      messages: [
-        {
-          role: 'system',
-          content: `You are a flashcard generator. Create study flashcards from notes. Always return valid JSON arrays.${langInstruction ? '\n\n' + langInstruction : ''}`
-        },
-        {
-          role: 'user',
-          content: `Based on these study notes, generate ${numFlashcards} flashcard pairs. Return them as a JSON array with this structure: [{"front": "question/concept", "back": "answer/definition"}, ...]
+    const responseText = await callAI(
+      `You are a flashcard generator. Create study flashcards from notes. Always return valid JSON arrays.${langInstruction ? '\n\n' + langInstruction : ''}`,
+      `Based on these study notes, generate ${numFlashcards} flashcard pairs. Return them as a JSON array with this structure: [{"front": "question/concept", "back": "answer/definition"}, ...]
 
 Study notes:
 ${notesText}
 
 Return ONLY valid JSON, no markdown or extra text.`
-        }
-      ]
-    })
-
-    const responseText = response.choices[0]?.message?.content || '[]'
+    )
 
     // Parse the JSON response
     let flashcards = []
