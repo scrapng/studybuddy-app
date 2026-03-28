@@ -68,6 +68,11 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'NoteBuddy API Server running' })
 })
 
+// POST routing test (public, no auth) — helps diagnose 405 issues
+app.post('/api/ai/test-post', (req, res) => {
+  res.json({ ok: true, method: req.method, body: req.body })
+})
+
 // AI model connectivity test (public, no auth required)
 app.get('/api/ai/test', async (req, res) => {
   if (!process.env.OPENAI_API_KEY) {
