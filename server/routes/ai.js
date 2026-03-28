@@ -48,41 +48,40 @@ function getLangInstruction(language, subjectName) {
 }
 
 /**
- * Call OpenAI Responses API for text-only tasks.
- * Uses `instructions` for system prompt and `input` as a string.
+ * Call OpenAI Chat Completions for text-only tasks.
+ * Uses proven chat completions format for reliability.
  */
-async function callText(instructions, userPrompt, maxTokens = 4096) {
-  const params = {
+async function callText(systemPrompt, userPrompt, maxTokens = 4096) {
+  const messages = []
+  if (systemPrompt) messages.push({ role: 'system', content: systemPrompt })
+  messages.push({ role: 'user', content: userPrompt })
+
+  const response = await getClient().chat.completions.create({
     model: MODEL,
-    input: userPrompt,
-    max_output_tokens: maxTokens,
-  }
-  if (instructions) {
-    params.instructions = instructions
-  }
-  const response = await getClient().responses.create(params)
-  return response.output_text || ''
+    messages,
+    max_completion_tokens: maxTokens,
+  })
+  return response.choices[0]?.message?.content || ''
 }
 
 /**
- * Call OpenAI Responses API for vision (image + text) tasks.
- * Uses array input with user message containing image and text content parts.
+ * Call OpenAI Chat Completions for vision (image + text) tasks.
  */
 async function callVision(imageUrl, textPrompt, maxTokens = 2048) {
-  const response = await getClient().responses.create({
+  const response = await getClient().chat.completions.create({
     model: MODEL,
-    input: [
+    messages: [
       {
         role: 'user',
         content: [
-          { type: 'input_image', image_url: imageUrl, detail: 'high' },
-          { type: 'input_text', text: textPrompt },
+          { type: 'image_url', image_url: { url: imageUrl, detail: 'high' } },
+          { type: 'text', text: textPrompt },
         ],
       },
     ],
-    max_output_tokens: maxTokens,
+    max_completion_tokens: maxTokens,
   })
-  return response.output_text || ''
+  return response.choices[0]?.message?.content || ''
 }
 
 // Validate API key middleware
@@ -91,6 +90,19 @@ router.use((req, res, next) => {
     return res.status(503).json({ error: 'OpenAI API key not configured' })
   }
   next()
+})
+
+// ---------------------------------------------------------------------------
+// Debug endpoint — test model connectivity (remove in production if desired)
+// ---------------------------------------------------------------------------
+router.get('/test', async (req, res) => {
+  try {
+    const text = await callText(null, 'Say "OK" and nothing else.')
+    res.json({ ok: true, model: MODEL, response: text })
+  } catch (err) {
+    console.error('AI test error:', err?.message ?? err)
+    res.status(500).json({ ok: false, model: MODEL, error: err?.message })
+  }
 })
 
 // ---------------------------------------------------------------------------
@@ -107,10 +119,11 @@ router.post('/ocr', async (req, res) => {
 
     const langNote = getLangInstruction(language, subjectName)
     const prompt = [
-      'Extract ALL text visible in this image of handwritten or printed notes.',
-      'Preserve structure, headings, bullet points, and numbering as closely as possible.',
+      'Extract ALL visible text from this image of handwritten or printed notes.',
+      'Preserve structure, headings, bullet points, and numbering.',
+      'If no text is visible in the image, respond with an empty string.',
       'If handwriting is unclear, make your best interpretation.',
-      'Return ONLY the extracted text — no commentary, no extra text.',
+      'Return ONLY the extracted text — no commentary, no extra explanation.',
       langNote,
     ].filter(Boolean).join('\n')
 
@@ -131,14 +144,14 @@ router.post('/enhance-ocr-text', async (req, res) => {
     if (!text) return res.status(400).json({ error: 'text required' })
 
     const langNote = getLangInstruction(language, subjectName)
-    const instructions = [
+    const system = [
       'You are a text cleanup assistant.',
-      'Fix OCR errors, typos, and formatting while preserving the original meaning and structure.',
+      'Fix OCR errors, typos, and formatting while preserving the original meaning.',
       langNote,
     ].filter(Boolean).join(' ')
 
     const cleaned = await callText(
-      instructions,
+      system,
       `Clean up this raw OCR text, fix typos, and make it readable. Return only the cleaned text:\n\n${text}`
     )
     res.json({ text: cleaned, success: true })
@@ -157,22 +170,22 @@ router.post('/enhance-notes', async (req, res) => {
     if (!content || !mode) return res.status(400).json({ error: 'content and mode required' })
 
     const modeInstructions = {
-      simplify:       'Simplify this text while keeping all important information. Make it easier to understand.',
-      detailed:       'Expand on this text with more detail and explanation. Add helpful context.',
-      'bullet-points':'Convert this text into a clear, structured bullet-point list. Use bullets for each key idea.',
-      eli5:           'Explain this text as if teaching it to a 5-year-old. Use simple words and clear analogies.',
-      'exam-prep':    'Format this as exam preparation notes. Highlight key terms, definitions, and important concepts.',
+      simplify:        'Simplify this text while keeping all important information. Make it easier to understand.',
+      detailed:        'Expand on this text with more detail and explanation. Add helpful context.',
+      'bullet-points': 'Convert this text into a clear, structured bullet-point list.',
+      eli5:            'Explain this text as if teaching a 5-year-old. Use simple words and clear analogies.',
+      'exam-prep':     'Format this as exam preparation notes: key terms, definitions, important concepts.',
     }
     const modePrompt = modeInstructions[mode] || modeInstructions.simplify
     const langNote = getLangInstruction(language, subjectName)
 
-    const instructions = [
-      'You are a helpful study assistant. Enhance study notes.',
+    const system = [
+      'You are a helpful study assistant that enhances study notes.',
       modePrompt,
       langNote,
     ].filter(Boolean).join('\n')
 
-    const enhanced = await callText(instructions, `Enhance these notes:\n\n${content}`)
+    const enhanced = await callText(system, `Enhance these notes:\n\n${content}`)
     res.json({ enhanced, success: true })
   } catch (err) {
     console.error('Enhance notes error:', err?.message ?? err)
@@ -192,7 +205,7 @@ router.post('/generate-quiz', async (req, res) => {
     const n = Math.min(parseInt(count) || 5, 20)
     const langNote = getLangInstruction(language, subjectName)
 
-    const instructions = [
+    const system = [
       'You are a quiz generator. Generate quiz questions from study notes.',
       'Always return ONLY valid JSON — no markdown fences, no extra text.',
       langNote,
@@ -201,12 +214,12 @@ router.post('/generate-quiz', async (req, res) => {
     const userPrompt = `Generate ${n} quiz questions from the notes below as a JSON array.
 
 STRICT RULES:
-- "multiple-choice": include "options" array with exactly 4 answer choices (plain text, no A/B/C/D letters). "answer" must exactly match one option string.
-- "true-false": NO "options" field at all. "answer" must be exactly "True" or "False".
-- "short-answer": NO "options" field. "answer" is a brief text.
-- Never mix types: if answer is True/False, type MUST be "true-false" with no options array.
+- "multiple-choice": "options" array with exactly 4 plain text choices (no A/B/C/D letters). "answer" must exactly match one option.
+- "true-false": NO "options" field. "answer" must be exactly "True" or "False".
+- "short-answer": NO "options" field. "answer" is brief text.
+- NEVER add options to a true-false question.
 
-JSON structure:
+JSON format:
 [{"type":"multiple-choice"|"true-false"|"short-answer","question":"...","options":[...] (mc only),"answer":"...","explanation":"..."}]
 
 Notes:
@@ -214,17 +227,17 @@ ${notesText}
 
 Return ONLY the JSON array.`
 
-    const raw = await callText(instructions, userPrompt, 4096)
+    const raw = await callText(system, userPrompt, 4096)
 
     let questions = []
     try {
       const m = raw.match(/\[[\s\S]*\]/)
       questions = m ? JSON.parse(m[0]) : []
     } catch {
-      console.warn('Quiz JSON parse failed, raw:', raw.slice(0, 200))
+      console.warn('Quiz JSON parse failed:', raw.slice(0, 300))
     }
 
-    // Normalise: ensure true-false questions never have options
+    // Enforce: true-false answers must not have options
     questions = questions.map(q => {
       const ans = (q.answer || '').trim()
       if (ans === 'True' || ans === 'False' || q.type === 'true-false') {
@@ -252,7 +265,7 @@ router.post('/generate-flashcards', async (req, res) => {
     const n = Math.min(parseInt(count) || 5, 20)
     const langNote = getLangInstruction(language, subjectName)
 
-    const instructions = [
+    const system = [
       'You are a flashcard generator. Create study flashcards from notes.',
       'Always return ONLY valid JSON — no markdown fences, no extra text.',
       langNote,
@@ -260,21 +273,21 @@ router.post('/generate-flashcards', async (req, res) => {
 
     const userPrompt = `Generate ${n} flashcard pairs from the notes below as a JSON array.
 
-JSON structure: [{"front":"question or concept","back":"answer or definition"}]
+JSON format: [{"front":"question or concept","back":"answer or definition"}]
 
 Notes:
 ${notesText}
 
 Return ONLY the JSON array.`
 
-    const raw = await callText(instructions, userPrompt, 4096)
+    const raw = await callText(system, userPrompt, 4096)
 
     let flashcards = []
     try {
       const m = raw.match(/\[[\s\S]*\]/)
       flashcards = m ? JSON.parse(m[0]) : []
     } catch {
-      console.warn('Flashcard JSON parse failed, raw:', raw.slice(0, 200))
+      console.warn('Flashcard JSON parse failed:', raw.slice(0, 300))
     }
 
     res.json({ flashcards, success: true })
