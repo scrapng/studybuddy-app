@@ -3,7 +3,8 @@ import OpenAI from 'openai'
 
 const router = express.Router()
 
-const MODEL = 'gpt-5.4-nano-2026-03-17'
+const MODEL = 'gpt-5.4-nano-2026-03-17'        // text tasks (fast, cheap)
+const VISION_MODEL = 'gpt-5.4-mini-2026-03-17'  // vision tasks (supports images)
 
 // Lazy-load OpenAI client
 let openai = null
@@ -66,10 +67,11 @@ async function callText(systemPrompt, userPrompt, maxTokens = 4096) {
 
 /**
  * Call OpenAI Chat Completions for vision (image + text) tasks.
+ * Uses a vision-capable model (mini, not nano — nano is text-only).
  */
 async function callVision(imageUrl, textPrompt, maxTokens = 2048) {
   const response = await getClient().chat.completions.create({
-    model: MODEL,
+    model: VISION_MODEL,
     messages: [
       {
         role: 'user',
@@ -96,13 +98,17 @@ router.use((req, res, next) => {
 // Debug endpoint — test model connectivity (remove in production if desired)
 // ---------------------------------------------------------------------------
 router.get('/test', async (req, res) => {
+  const results = {}
   try {
-    const text = await callText(null, 'Say "OK" and nothing else.')
-    res.json({ ok: true, model: MODEL, response: text })
+    results.text = await callText(null, 'Say "OK" and nothing else.')
+    results.textModel = MODEL
+    results.textOk = true
   } catch (err) {
-    console.error('AI test error:', err?.message ?? err)
-    res.status(500).json({ ok: false, model: MODEL, error: err?.message })
+    results.textOk = false
+    results.textModel = MODEL
+    results.textError = err?.message
   }
+  res.json(results)
 })
 
 // ---------------------------------------------------------------------------
