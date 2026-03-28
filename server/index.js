@@ -28,12 +28,19 @@ if (!process.env.OPENAI_API_KEY) {
 app.use(helmet())
 
 // CORS configuration
+// Security is handled by JWT auth — allow all origins so the frontend works
+// regardless of deployment URL. Set ALLOWED_ORIGINS to restrict if needed.
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
-  : ['http://localhost:5173', 'http://localhost:4173']
+  : null // null = allow all
 
 app.use(cors({
-  origin: isDev ? true : allowedOrigins,
+  origin: allowedOrigins
+    ? (origin, cb) => {
+        if (!origin || allowedOrigins.includes(origin)) cb(null, true)
+        else cb(new Error(`CORS: origin ${origin} not allowed`))
+      }
+    : true, // allow all when ALLOWED_ORIGINS not set
   credentials: true,
 }))
 
