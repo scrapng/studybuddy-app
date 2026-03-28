@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { Bell, Check, CheckCheck, Trash2, UserPlus, MessageCircle, Share2, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useSocialContext } from '@/contexts/SocialContext'
@@ -46,22 +47,16 @@ export function NotificationsPanel({ dropUp = false, dropDown = false }: { dropU
   const buttonRef = useRef<HTMLButtonElement>(null)
 
   function handleToggle() {
-    if (!open && dropUp && buttonRef.current) {
+    if (!open && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect()
-      setFixedPos({
-        bottom: window.innerHeight - rect.top + 4,
-        left: rect.left,
-        top: 0,
-      })
-    }
-    if (!open && dropDown && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect()
-      const left = Math.min(rect.left, window.innerWidth - 320 - 8)
-      setFixedPos({
-        bottom: 0,
-        left: left,
-        top: rect.bottom + 4,
-      })
+      if (dropUp) {
+        // Sidebar: open upward
+        setFixedPos({ bottom: window.innerHeight - rect.top + 4, left: rect.left, top: 0 })
+      } else {
+        // Mobile top nav or desktop: open downward, clamped to screen edge
+        const left = Math.min(rect.left, window.innerWidth - 320 - 8)
+        setFixedPos({ bottom: 0, left: Math.max(8, left), top: rect.bottom + 4 })
+      }
     }
     setOpen(v => !v)
   }
@@ -125,14 +120,14 @@ export function NotificationsPanel({ dropUp = false, dropDown = false }: { dropU
         )}
       </Button>
 
-      {open && (
+      {open && createPortal(
         <div
-          className="w-80 max-h-[480px] flex flex-col bg-card border rounded-xl shadow-xl z-[9999] overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200"
+          className="w-80 max-h-[480px] flex flex-col bg-card border rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200"
           style={dropUp
-            ? { position: 'fixed', bottom: fixedPos.bottom, left: fixedPos.left }
+            ? { position: 'fixed', bottom: fixedPos.bottom, left: fixedPos.left, zIndex: 9999 }
             : dropDown
-            ? { position: 'fixed', top: fixedPos.top, left: fixedPos.left }
-            : { position: 'absolute', top: '100%', right: 0, marginTop: 4 }
+            ? { position: 'fixed', top: fixedPos.top, left: fixedPos.left, zIndex: 9999 }
+            : { position: 'fixed', top: fixedPos.top, left: fixedPos.left, zIndex: 9999 }
           }
         >
           {/* Header */}
@@ -211,7 +206,8 @@ export function NotificationsPanel({ dropUp = false, dropDown = false }: { dropU
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

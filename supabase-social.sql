@@ -176,28 +176,40 @@ DROP POLICY IF EXISTS "Members can view group members" ON group_members;
 DROP POLICY IF EXISTS "Users can join groups" ON group_members;
 DROP POLICY IF EXISTS "Members can leave or be removed" ON group_members;
 
+-- Security definer helpers — bypass RLS to avoid infinite recursion
+DROP FUNCTION IF EXISTS public.is_group_member(UUID) CASCADE;
+CREATE OR REPLACE FUNCTION public.is_group_member(_group_id UUID)
+RETURNS BOOLEAN LANGUAGE SQL SECURITY DEFINER SET search_path = public AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM group_members WHERE group_id = _group_id AND user_id = auth.uid()
+  );
+$$;
+
+DROP FUNCTION IF EXISTS public.is_group_owner(UUID) CASCADE;
+CREATE OR REPLACE FUNCTION public.is_group_owner(_group_id UUID)
+RETURNS BOOLEAN LANGUAGE SQL SECURITY DEFINER SET search_path = public AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM group_members WHERE group_id = _group_id AND user_id = auth.uid() AND role = 'owner'
+  );
+$$;
+
 CREATE POLICY "Members can view group members"
   ON group_members FOR SELECT
-  USING (auth.uid() IN (SELECT user_id FROM group_members gm WHERE gm.group_id = group_id));
+  USING (is_group_member(group_id));
 
 CREATE POLICY "Users can join groups"
   ON group_members FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "Members can leave or be removed"
   ON group_members FOR DELETE
-  USING (
-    auth.uid() = user_id OR
-    auth.uid() IN (SELECT user_id FROM group_members WHERE group_id = group_members.group_id AND role = 'owner')
-  );
+  USING (auth.uid() = user_id OR is_group_owner(group_id));
 
 
 -- Add group view policy for study_groups (after group_members exists)
+-- Uses is_group_member() security definer to avoid RLS recursion
 CREATE POLICY "Group members can view their groups"
   ON study_groups FOR SELECT
-  USING (
-    auth.uid() = owner_id OR
-    auth.uid() IN (SELECT user_id FROM group_members WHERE group_id = id)
-  );
+  USING (auth.uid() = owner_id OR is_group_member(id));
 
 
 -- ============================================================
@@ -230,7 +242,7 @@ CREATE POLICY "Users can view relevant shared content"
   USING (
     auth.uid() = sender_id OR
     auth.uid() = recipient_id OR
-    auth.uid() IN (SELECT user_id FROM group_members WHERE group_id = shared_content.group_id)
+    is_group_member(shared_content.group_id)
   );
 
 CREATE POLICY "Users can send content"
