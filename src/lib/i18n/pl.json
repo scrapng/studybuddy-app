@@ -309,7 +309,8 @@
     "goalsTab": "Cele",
     "notFound": "Nie znaleziono zestawu nauki.",
     "setDeleted": "Zestaw nauki usunięty",
-    "setExported": "Zestaw nauki wyeksportowany"
+    "setExported": "Zestaw nauki wyeksportowany",
+    "share": "Udostępnij"
   },
   "notes": {
     "addNote": "Dodaj notatkę",

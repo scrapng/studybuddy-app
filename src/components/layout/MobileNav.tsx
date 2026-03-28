@@ -48,7 +48,7 @@ export function MobileNav() {
       </Link>
 
       <div className="flex items-center gap-1">
-        <NotificationsPanel />
+        <NotificationsPanel dropDown />
         <ThemeToggle />
         <LanguageToggle />
         <Sheet open={open} onOpenChange={setOpen}>

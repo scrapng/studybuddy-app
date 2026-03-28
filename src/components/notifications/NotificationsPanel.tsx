@@ -31,7 +31,7 @@ function getNavTarget(n: Notification): string | null {
   return null
 }
 
-export function NotificationsPanel({ dropUp = false }: { dropUp?: boolean }) {
+export function NotificationsPanel({ dropUp = false, dropDown = false }: { dropUp?: boolean; dropDown?: boolean }) {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const {
@@ -41,7 +41,7 @@ export function NotificationsPanel({ dropUp = false }: { dropUp?: boolean }) {
     markAllNotificationsReadLocal,
   } = useSocialContext()
   const [open, setOpen] = useState(false)
-  const [fixedPos, setFixedPos] = useState({ bottom: 0, left: 0 })
+  const [fixedPos, setFixedPos] = useState({ bottom: 0, left: 0, top: 0 })
   const containerRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
 
@@ -51,6 +51,16 @@ export function NotificationsPanel({ dropUp = false }: { dropUp?: boolean }) {
       setFixedPos({
         bottom: window.innerHeight - rect.top + 4,
         left: rect.left,
+        top: 0,
+      })
+    }
+    if (!open && dropDown && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect()
+      const left = Math.min(rect.left, window.innerWidth - 320 - 8)
+      setFixedPos({
+        bottom: 0,
+        left: left,
+        top: rect.bottom + 4,
       })
     }
     setOpen(v => !v)
@@ -120,6 +130,8 @@ export function NotificationsPanel({ dropUp = false }: { dropUp?: boolean }) {
           className="w-80 max-h-[480px] flex flex-col bg-card border rounded-xl shadow-xl z-[9999] overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200"
           style={dropUp
             ? { position: 'fixed', bottom: fixedPos.bottom, left: fixedPos.left }
+            : dropDown
+            ? { position: 'fixed', top: fixedPos.top, left: fixedPos.left }
             : { position: 'absolute', top: '100%', right: 0, marginTop: 4 }
           }
         >

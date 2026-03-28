@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Play, Pencil, Trash2, FileQuestion, Download, Upload, Zap, Sparkles, Camera, Brain } from 'lucide-react'
+import { ArrowLeft, Play, Pencil, Trash2, FileQuestion, Download, Upload, Zap, Sparkles, Camera, Brain, Share2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
@@ -14,6 +14,7 @@ import { GoalList } from '@/components/goals/GoalList'
 import { ImportDialog } from '@/components/shared/ImportDialog'
 import { PhotoNoteUpload } from '@/components/notes/PhotoNoteUpload'
 import { AIQuizGenerateDialog } from '@/components/notes/AIQuizGenerateDialog'
+import { ShareContentDialog } from '@/components/social/ShareContentDialog'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -42,6 +43,7 @@ export function StudySetPage() {
   const [importOpen, setImportOpen] = useState(false)
   const [photoOpen, setPhotoOpen] = useState(false)
   const [aiQuizOpen, setAiQuizOpen] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
 
   if (!studySet || !subject) {
     return (
@@ -113,6 +115,9 @@ export function StudySetPage() {
               {t.studySet.challenge}
             </Button>
           )}
+          <Button variant="outline" size="icon" onClick={() => setShareOpen(true)} title={t.studySet.share}>
+            <Share2 className="h-4 w-4" />
+          </Button>
           <Button variant="outline" size="icon" onClick={() => {
             const json = exportStudySetAsJSON(studySet)
             downloadJSON(json, `${studySet.name.toLowerCase().replace(/\s+/g, '-')}.json`)
@@ -204,6 +209,14 @@ export function StudySetPage() {
         onOpenChange={setAiQuizOpen}
         setId={studySet.id}
         notes={studySet.notes}
+      />
+
+      <ShareContentDialog
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        contentType="flashcard_set"
+        title={studySet.name}
+        payload={{ setId: studySet.id }}
       />
     </div>
   )

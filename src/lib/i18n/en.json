@@ -309,7 +309,8 @@
     "goalsTab": "Goals",
     "notFound": "Study set not found.",
     "setDeleted": "Study set deleted",
-    "setExported": "Study set exported"
+    "setExported": "Study set exported",
+    "share": "Share"
   },
   "notes": {
     "addNote": "Add Note",
