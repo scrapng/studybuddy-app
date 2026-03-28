@@ -55,6 +55,27 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'NoteBuddy API Server running' })
 })
 
+// AI model connectivity test (public, no auth required)
+app.get('/api/ai/test', async (req, res) => {
+  if (!process.env.OPENAI_API_KEY) {
+    return res.status(503).json({ ok: false, error: 'OPENAI_API_KEY not set on server' })
+  }
+  try {
+    const { default: OpenAI } = await import('openai')
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+    const response = await client.chat.completions.create({
+      model: 'gpt-5.4-nano-2026-03-17',
+      messages: [{ role: 'user', content: 'Say "OK" and nothing else.' }],
+      max_completion_tokens: 10,
+    })
+    const text = response.choices[0]?.message?.content || ''
+    res.json({ ok: true, textModel: 'gpt-5.4-nano-2026-03-17', response: text })
+  } catch (err) {
+    console.error('AI test error:', err?.message)
+    res.status(500).json({ ok: false, textModel: 'gpt-5.4-nano-2026-03-17', error: err?.message })
+  }
+})
+
 // AI routes (protected + rate limited)
 app.use('/api/ai', requireAuth, aiLimiter, aiRoutes)
 
