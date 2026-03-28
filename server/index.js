@@ -24,31 +24,21 @@ if (!process.env.OPENAI_API_KEY) {
   console.warn('⚠️  WARNING: OPENAI_API_KEY not set. AI features will not work.')
 }
 
-// Security middleware
-app.use(helmet())
-
-// CORS configuration
-// Security is handled by JWT auth — allow all origins so the frontend works
-// regardless of deployment URL. Set ALLOWED_ORIGINS to restrict if needed.
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
-  : null // null = allow all
-
+// CORS must be configured BEFORE helmet (helmet can strip CORS headers)
+// We use wildcard origin — security is handled by JWT auth, not origin checks.
+// Authorization header-based auth doesn't require credentials:true (that's for cookies).
 const corsOptions = {
-  origin: allowedOrigins
-    ? (origin, cb) => {
-        if (!origin || allowedOrigins.includes(origin)) cb(null, true)
-        else cb(new Error(`CORS: origin ${origin} not allowed`))
-      }
-    : true, // allow all when ALLOWED_ORIGINS not set
-  credentials: true,
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }
-
-// Handle all OPTIONS preflight requests before any other middleware
-app.options('*', cors(corsOptions))
+app.options('*', cors(corsOptions))  // handle preflight first
 app.use(cors(corsOptions))
+
+// Security middleware (after CORS so it doesn't strip CORS headers)
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}))
 
 app.use(express.json({ limit: '50mb' }))
 app.use(express.urlencoded({ extended: true, limit: '50mb' }))
