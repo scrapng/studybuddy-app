@@ -120,11 +120,22 @@
   * {
     @apply border-border outline-ring/50;
     }
-  body {
-    @apply bg-background text-foreground;
-    }
   html {
     @apply font-sans scroll-smooth;
+    /* Fallback background so no white flashes on iOS Safari safe areas */
+    background: #f0f8ff;
+    }
+  html.dark {
+    background: #03060f;
+    }
+  body {
+    @apply text-foreground;
+    background: transparent;
+    /* Fill iOS safe areas (notch + home bar) with the same background */
+    min-height: 100dvh;
+    }
+  #root {
+    min-height: 100dvh;
     }
 }
 
@@ -532,6 +543,7 @@
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
+
 
 /* Theme toggle icon spin */
 @keyframes spin-once {

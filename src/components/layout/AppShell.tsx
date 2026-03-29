@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { useGlowEffect } from '@/hooks/useGlowEffect'
 import { useThemeShortcut } from '@/hooks/useThemeShortcut'
 import { ThemeToast } from '@/components/shared/ThemeToast'
+import { SkyBackground } from '@/components/shared/SkyBackground'
 
 export function AppShell() {
   const location = useLocation()
@@ -12,11 +13,12 @@ export function AppShell() {
   const themeToast = useThemeShortcut()
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-dvh overflow-hidden">
+      <SkyBackground />
       <Sidebar />
       <div className="flex-1 flex flex-col h-full overflow-y-auto">
         <MobileNav />
-        <main className="flex-1 p-4 md:p-6 lg:p-8 max-w-7xl w-full mx-auto pb-16">
+        <main className="flex-1 p-4 md:p-6 lg:p-8 max-w-7xl w-full mx-auto" style={{ paddingBottom: 'calc(4rem + env(safe-area-inset-bottom))' }}>
           <div key={location.pathname} className="animate-page-enter">
             <Outlet />
           </div>

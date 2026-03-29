@@ -1,5 +1,7 @@
 {
-  "app": { "name": "NoteBuddy" },
+  "app": {
+    "name": "NoteBuddy"
+  },
   "nav": {
     "dashboard": "Pulpit",
     "subjects": "Przedmioty",
@@ -11,7 +13,10 @@
     "groups": "Grupy",
     "settings": "Ustawienia"
   },
-  "lang": { "english": "English", "polish": "Polski" },
+  "lang": {
+    "english": "English",
+    "polish": "Polski"
+  },
   "common": {
     "save": "Zapisz",
     "cancel": "Anuluj",
@@ -304,7 +309,8 @@
     "goalsTab": "Cele",
     "notFound": "Nie znaleziono zestawu nauki.",
     "setDeleted": "Zestaw nauki usunięty",
-    "setExported": "Zestaw nauki wyeksportowany"
+    "setExported": "Zestaw nauki wyeksportowany",
+    "share": "Udostępnij"
   },
   "notes": {
     "addNote": "Dodaj notatkę",
@@ -438,7 +444,9 @@
     "shortAnswer": "Krótka odpowiedź",
     "fillBlank": "Uzupełnij lukę",
     "fillBlankPlaceholder": "Uzupełnij lukę...",
-    "typeAnswerPlaceholder": "Wpisz odpowiedź..."
+    "typeAnswerPlaceholder": "Wpisz odpowiedź...",
+    "trueOption": "Prawda",
+    "falseOption": "Fałsz"
   },
   "study": {
     "setNotFound": "Nie znaleziono zestawu nauki.",
@@ -510,7 +518,9 @@
     "passwordsNoMatch": "Hasła nie są identyczne",
     "signUpSuccess": "Konto utworzone! Sprawdź e-mail, aby je zweryfikować.",
     "signInError": "Logowanie nie powiodło się. Sprawdź dane logowania.",
-    "signUpError": "Nie udało się utworzyć konta. Spróbuj ponownie."
+    "signUpError": "Nie udało się utworzyć konta. Spróbuj ponownie.",
+    "displayName": "Nazwa użytkownika",
+    "displayNamePlaceholder": "np. Tomasz"
   },
   "settings": {
     "title": "Ustawienia",
@@ -541,6 +551,61 @@
     "typeDelete": "Wpisz DELETE, aby potwierdzić",
     "permanentlyDelete": "Trwale usuń konto",
     "accountDeleted": "Konto usunięte pomyślnie",
-    "signOutDesc": "Wyloguj się z konta na tym urządzeniu."
+    "signOutDesc": "Wyloguj się z konta na tym urządzeniu.",
+    "displayName": "Nazwa użytkownika",
+    "displayNameDesc": "Ta nazwa będzie widoczna dla Twoich znajomych.",
+    "displayNamePlaceholder": "np. Tomasz",
+    "displayNameUpdated": "Nazwa użytkownika zaktualizowana"
+  },
+  "notifications": {
+    "title": "Powiadomienia",
+    "markAllRead": "Oznacz jako przeczytane",
+    "markAsRead": "Oznacz jako przeczytane",
+    "empty": "Brak powiadomień",
+    "allCaughtUp": "Wszystko przeczytane!"
+  },
+  "theme": {
+    "light": "Jasny",
+    "dark": "Ciemny",
+    "system": "Systemowy",
+    "lightMode": "Tryb jasny",
+    "darkMode": "Tryb ciemny"
+  },
+  "landing": {
+    "tagline": "Asystent nauki wspierany przez AI",
+    "heroTitle1": "Ucz się mądrzej,",
+    "heroTitle2": "nie ciężej",
+    "heroDesc": "Kompleksowa platforma do nauki z fiszkami opartymi na AI, skanowaniem notatek, generowaniem quizów i powtórkami — stworzona, by uczyć się szybciej.",
+    "getStartedFree": "Zacznij za darmo",
+    "signIn": "Zaloguj się",
+    "statPowered": "Wspierany",
+    "statTools": "Narzędzia nauki",
+    "statFree": "Darmowy",
+    "featuresTitle": "Wszystko, czego potrzebujesz, by zdać egzamin",
+    "featuresDesc": "Potężne narzędzia zaprojektowane, by nauka była efektywna, przyjemna i skuteczna.",
+    "feat1Title": "Inteligentne fiszki",
+    "feat1Desc": "Ucz się z powtórkami rozłożonymi w czasie, które dostosowują się do Twojego tempa.",
+    "feat2Title": "Skanuj notatki",
+    "feat2Desc": "Zrób zdjęcie odręcznych notatek i natychmiast zamień je na tekst cyfrowy.",
+    "feat3Title": "Quizy generowane przez AI",
+    "feat3Desc": "Automatycznie generuj pytania quizowe i fiszki z notatek.",
+    "feat4Title": "Ulepszanie notatek",
+    "feat4Desc": "Transformuj notatki za pomocą AI — uprość, rozbuduj lub przygotuj do egzaminu.",
+    "feat5Title": "Analityka postępów",
+    "feat5Desc": "Śledź czas nauki, wyniki, serie i opanowanie materiału.",
+    "feat6Title": "Bezpieczny i prywatny",
+    "feat6Desc": "Twoje dane są szyfrowane i bezpiecznie przechowywane. Tylko Ty masz do nich dostęp.",
+    "howTitle": "Jak to działa",
+    "howDesc": "Zacznij w trzech prostych krokach",
+    "step1Title": "Utwórz i organizuj",
+    "step1Desc": "Skonfiguruj przedmioty i zestawy nauki, aby organizować materiały do nauki.",
+    "step2Title": "Dodaj materiały",
+    "step2Desc": "Dodawaj notatki ręcznie, skanuj zdjęcia lub pozwól AI generować fiszki i quizy.",
+    "step3Title": "Ucz się i śledź",
+    "step3Desc": "Korzystaj z powtórek rozłożonych w czasie i śledź swoje postępy.",
+    "ctaTitle": "Gotowy, by poprawić swoje oceny?",
+    "ctaDesc": "Dołącz do NoteBuddy i ucz się mądrzej z narzędziami wspieranymi przez AI.",
+    "ctaButton": "Zacznij — to bezpłatne",
+    "footerRights": "Wszelkie prawa zastrzeżone."
   }
 }

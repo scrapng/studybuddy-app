@@ -88,7 +88,7 @@ export function Sidebar() {
         )}
         <div className={cn('flex items-center', collapsed ? 'justify-center flex-col gap-1' : 'justify-between')}>
           <div className="flex items-center gap-1">
-            <NotificationsPanel />
+            <NotificationsPanel dropUp />
             <ThemeToggle />
             <LanguageToggle />
             <Button

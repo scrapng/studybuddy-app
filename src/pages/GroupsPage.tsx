@@ -115,24 +115,24 @@ export function GroupsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between animate-in fade-in duration-500">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 animate-in fade-in duration-500">
         <div>
           <h1 className="text-2xl font-bold">Study Groups</h1>
           <p className="text-muted-foreground text-sm">Learn together with friends</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setJoinOpen(true)} className="gap-2">
+          <Button variant="outline" onClick={() => setJoinOpen(true)} className="gap-2 flex-1 sm:flex-none">
             <Users className="h-4 w-4" />
             Join Group
           </Button>
-          <Button onClick={() => setCreateOpen(true)} className="gap-2">
+          <Button onClick={() => setCreateOpen(true)} className="gap-2 flex-1 sm:flex-none">
             <Plus className="h-4 w-4" />
             Create Group
           </Button>
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {/* Groups list */}
         <div className="space-y-3">
           {loading ? (
