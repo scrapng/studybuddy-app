@@ -52,15 +52,16 @@ export function SkyBackground() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
+    // Use screen dimensions for star generation — stable, unaffected by iOS URL bar
     let width = 0, height = 0
+    let starsWidth = 0, starsHeight = 0
 
-    function resize() {
-      width = canvas!.width = window.innerWidth
-      height = canvas!.height = window.innerHeight
-      // Regenerate stars on resize
+    function generateStars(w: number, h: number) {
+      starsWidth = w
+      starsHeight = h
       starsRef.current = Array.from({ length: 220 }, () => ({
-        x: Math.random() * width,
-        y: Math.random() * height * 0.85,
+        x: Math.random() * w,
+        y: Math.random() * h * 0.85,
         radius: Math.random() < 0.15 ? Math.random() * 1.8 + 1.0 : Math.random() * 0.9 + 0.2,
         opacity: Math.random() * 0.7 + 0.3,
         twinkleSpeed: Math.random() * 0.006 + 0.002,
@@ -68,8 +69,33 @@ export function SkyBackground() {
       }))
     }
 
+    function resize() {
+      const vp = window.visualViewport
+      const newW = vp ? vp.width : window.innerWidth
+      const newH = vp ? vp.height : window.innerHeight
+      width = canvas!.width = newW
+      height = canvas!.height = newH
+      // Only regenerate stars on significant width change (not iOS URL bar height jitter)
+      if (Math.abs(newW - starsWidth) > 80 || starsRef.current.length === 0) {
+        generateStars(newW, newH)
+      }
+    }
+
     resize()
-    window.addEventListener('resize', resize)
+
+    // Debounce resize to prevent rapid star regeneration from mobile URL bar
+    let resizeTimer: ReturnType<typeof setTimeout>
+    function handleResize() {
+      // Always update canvas size immediately to avoid blank areas
+      const vp = window.visualViewport
+      width = canvas!.width = vp ? vp.width : window.innerWidth
+      height = canvas!.height = vp ? vp.height : window.innerHeight
+      // Debounce the star regeneration part
+      clearTimeout(resizeTimer)
+      resizeTimer = setTimeout(resize, 200)
+    }
+    window.addEventListener('resize', handleResize)
+    window.visualViewport?.addEventListener('resize', handleResize)
 
     const shooting = shootingRef.current
     let lastTime = 0
@@ -205,12 +231,14 @@ export function SkyBackground() {
 
     return () => {
       cancelAnimationFrame(animRef.current)
-      window.removeEventListener('resize', resize)
+      clearTimeout(resizeTimer)
+      window.removeEventListener('resize', handleResize)
+      window.visualViewport?.removeEventListener('resize', handleResize)
     }
   }, [isDark])
 
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none" style={{ height: '100dvh' }}>
       {isDark ? (
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
       ) : (
