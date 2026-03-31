@@ -89,6 +89,54 @@ export function DashboardPage() {
         </Button>
       </div>
 
+      {/* AI Hero Section */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-purple-600 to-fuchsia-600 p-6 md:p-8 animate-in fade-in slide-in-from-top-2 duration-500 shadow-lg">
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/10" />
+        <div className="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-fuchsia-400/10 blur-3xl" />
+        <div className="relative">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="rounded-xl bg-white/20 p-2 backdrop-blur-sm">
+              <Sparkles className="h-6 w-6 text-white" />
+            </div>
+            <h2 className="text-xl md:text-2xl font-bold text-white">{t.dashboard.aiPoweredTools}</h2>
+          </div>
+          <p className="text-white/80 text-sm mb-6 max-w-lg">{t.dashboard.aiHeroDesc}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <Link to="/ai-tools" className="group flex items-center gap-4 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 p-4 transition-all hover:scale-[1.02] active:scale-[0.98]">
+              <div className="rounded-lg bg-blue-400/30 p-3 shrink-0 group-hover:bg-blue-400/40 transition-colors">
+                <Camera className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-semibold text-sm">{t.dashboard.scanNotes}</p>
+                <p className="text-white/70 text-xs mt-0.5">{t.dashboard.scanNotesDesc}</p>
+              </div>
+              <ArrowRight className="h-4 w-4 text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all shrink-0" />
+            </Link>
+            <Link to="/ai-tools" className="group flex items-center gap-4 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 p-4 transition-all hover:scale-[1.02] active:scale-[0.98]">
+              <div className="rounded-lg bg-purple-400/30 p-3 shrink-0 group-hover:bg-purple-400/40 transition-colors">
+                <Wand2 className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-semibold text-sm">{t.dashboard.enhance}</p>
+                <p className="text-white/70 text-xs mt-0.5">{t.dashboard.enhanceDesc}</p>
+              </div>
+              <ArrowRight className="h-4 w-4 text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all shrink-0" />
+            </Link>
+            <Link to="/ai-tools" className="group flex items-center gap-4 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 p-4 transition-all hover:scale-[1.02] active:scale-[0.98]">
+              <div className="rounded-lg bg-green-400/30 p-3 shrink-0 group-hover:bg-green-400/40 transition-colors">
+                <Brain className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-semibold text-sm">{t.dashboard.generateQuiz}</p>
+                <p className="text-white/70 text-xs mt-0.5">{t.dashboard.generateQuizDesc}</p>
+              </div>
+              <ArrowRight className="h-4 w-4 text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all shrink-0" />
+            </Link>
+          </div>
+        </div>
+      </div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 stagger-grid">
         <Link to="/analytics">
@@ -143,44 +191,6 @@ export function DashboardPage() {
           </Card>
         </Link>
       </div>
-
-      {/* AI-Powered Tools */}
-      <Card className="relative overflow-hidden border-purple-200 dark:border-purple-800/50 animate-in fade-in slide-in-from-top-2 duration-500">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-violet-500/5 to-fuchsia-500/5" />
-        <CardHeader className="relative pb-2">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-purple-500" />
-              {t.dashboard.aiPoweredTools}
-            </CardTitle>
-            <Link to="/ai-tools" className="text-xs text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1">
-              {t.common.viewAll} <ArrowRight className="h-3 w-3" />
-            </Link>
-          </div>
-        </CardHeader>
-        <CardContent className="relative">
-          <div className="grid grid-cols-3 gap-3">
-            <Link to="/ai-tools" className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-purple-500/10 transition-all hover:scale-105 active:scale-95">
-              <div className="rounded-lg bg-blue-500/10 p-2">
-                <Camera className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              </div>
-              <span className="text-xs font-medium text-center">{t.dashboard.scanNotes}</span>
-            </Link>
-            <Link to="/ai-tools" className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-purple-500/10 transition-all hover:scale-105 active:scale-95">
-              <div className="rounded-lg bg-purple-500/10 p-2">
-                <Wand2 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-              </div>
-              <span className="text-xs font-medium text-center">{t.dashboard.enhance}</span>
-            </Link>
-            <Link to="/ai-tools" className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-purple-500/10 transition-all hover:scale-105 active:scale-95">
-              <div className="rounded-lg bg-green-500/10 p-2">
-                <Brain className="h-4 w-4 text-green-600 dark:text-green-400" />
-              </div>
-              <span className="text-xs font-medium text-center">{t.dashboard.generateQuiz}</span>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Due for Review */}
       {dueReview.length > 0 && (

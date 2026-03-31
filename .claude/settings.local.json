@@ -58,7 +58,8 @@
       "Bash(node -e \"const o = require\\(''openai''\\); const c = new o.default\\({apiKey:''test''}\\); console.log\\(typeof c.responses\\)\")",
       "Bash(node -e \"const o = require\\(''openai''\\); const c = new o.default\\({apiKey:''test''}\\); console.log\\(typeof c.responses.create\\)\")",
       "Bash(npm install:*)",
-      "Bash(node -e \"console.log\\(require\\(''./node_modules/openai/package.json''\\).version\\)\")"
+      "Bash(node -e \"console.log\\(require\\(''./node_modules/openai/package.json''\\).version\\)\")",
+      "Bash(node -e \"const en=require\\(''./src/lib/i18n/en.json''\\); const pl=require\\(''./src/lib/i18n/pl.json''\\); function checkKeys\\(obj, ref, path=''''\\) { for\\(const k of Object.keys\\(ref\\)\\) { if\\(!\\(k in obj\\)\\) console.log\\(''MISSING in pl:'', path+''.''+k\\); else if\\(typeof ref[k]===''object''\\) checkKeys\\(obj[k], ref[k], path+''.''+k\\); } } checkKeys\\(pl, en\\);\")"
     ]
   }
 }

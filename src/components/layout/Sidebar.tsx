@@ -31,8 +31,8 @@ export function Sidebar() {
 
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: t.nav.dashboard },
-    { to: '/subjects', icon: BookOpen, label: t.nav.subjects },
     { to: '/ai-tools', icon: Sparkles, label: t.nav.aiTools, accent: true },
+    { to: '/subjects', icon: BookOpen, label: t.nav.subjects },
     { to: '/analytics', icon: BarChart3, label: t.nav.analytics },
     { to: '/schedule', icon: Calendar, label: t.nav.schedule },
     { to: '/achievements', icon: Trophy, label: t.nav.achievements },

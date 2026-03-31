@@ -32,17 +32,20 @@ export function AIToolsPage() {
       </div>
 
       {/* Feature Cards */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 stagger-grid">
-        <Card className="card-hover-lift group">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-blue-500/10 p-2.5 group-hover:bg-blue-500/20 transition-colors">
-                <Camera className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 stagger-grid">
+        <Card className="card-hover-lift group border-blue-200/50 dark:border-blue-800/30">
+          <CardHeader className="pb-3 pt-6 px-6">
+            <div className="flex items-start gap-4">
+              <div className="rounded-xl bg-blue-500/10 p-3.5 group-hover:bg-blue-500/20 transition-colors shrink-0">
+                <Camera className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
-              <CardTitle className="text-base">{t.ai.scanPhotoNotes}</CardTitle>
+              <div>
+                <CardTitle className="text-lg">{t.ai.scanPhotoNotes}</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">{t.ai.scanPhotoSubtitle}</p>
+              </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-6 pb-6">
             <p className="text-sm text-muted-foreground mb-4">{t.ai.scanPhotoDesc}</p>
             <p className="text-xs text-muted-foreground mb-3">{t.ai.chooseSet}</p>
             <div className="space-y-1.5 max-h-40 overflow-y-auto">
@@ -78,16 +81,19 @@ export function AIToolsPage() {
           </CardContent>
         </Card>
 
-        <Card className="card-hover-lift group">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-purple-500/10 p-2.5 group-hover:bg-purple-500/20 transition-colors">
-                <Wand2 className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+        <Card className="card-hover-lift group border-purple-200/50 dark:border-purple-800/30">
+          <CardHeader className="pb-3 pt-6 px-6">
+            <div className="flex items-start gap-4">
+              <div className="rounded-xl bg-purple-500/10 p-3.5 group-hover:bg-purple-500/20 transition-colors shrink-0">
+                <Wand2 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
-              <CardTitle className="text-base">{t.ai.enhanceNotes}</CardTitle>
+              <div>
+                <CardTitle className="text-lg">{t.ai.enhanceNotes}</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">{t.ai.enhanceSubtitle}</p>
+              </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-6 pb-6">
             <p className="text-sm text-muted-foreground mb-4">{t.ai.enhanceDesc}</p>
             <p className="text-xs text-muted-foreground mb-3">{t.ai.setsWithNotes}</p>
             <div className="space-y-1.5 max-h-40 overflow-y-auto">
@@ -120,16 +126,19 @@ export function AIToolsPage() {
           </CardContent>
         </Card>
 
-        <Card className="card-hover-lift group">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-green-500/10 p-2.5 group-hover:bg-green-500/20 transition-colors">
-                <Brain className="h-5 w-5 text-green-600 dark:text-green-400" />
+        <Card className="card-hover-lift group border-green-200/50 dark:border-green-800/30">
+          <CardHeader className="pb-3 pt-6 px-6">
+            <div className="flex items-start gap-4">
+              <div className="rounded-xl bg-green-500/10 p-3.5 group-hover:bg-green-500/20 transition-colors shrink-0">
+                <Brain className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
-              <CardTitle className="text-base">{t.ai.generateQuizFlashcards}</CardTitle>
+              <div>
+                <CardTitle className="text-lg">{t.ai.generateQuizFlashcards}</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">{t.ai.generateSubtitle}</p>
+              </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-6 pb-6">
             <p className="text-sm text-muted-foreground mb-4">{t.ai.generateDesc}</p>
             <p className="text-xs text-muted-foreground mb-3">{t.ai.setsWithNotes}</p>
             <div className="space-y-1.5 max-h-40 overflow-y-auto">
