@@ -54,11 +54,10 @@ export function SkyBackground() {
 
     // Use screen dimensions for star generation — stable, unaffected by iOS URL bar
     let width = 0, height = 0
-    let starsWidth = 0, starsHeight = 0
+    let starsWidth = 0
 
     function generateStars(w: number, h: number) {
       starsWidth = w
-      starsHeight = h
       starsRef.current = Array.from({ length: 220 }, () => ({
         x: Math.random() * w,
         y: Math.random() * h * 0.85,
