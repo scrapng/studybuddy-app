@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase'
 import { getRelativeTime } from '@/lib/utils'
 import type { Friend, Message } from '@/types/social'
 import { cn } from '@/lib/utils'
+import { useTranslation } from '@/hooks/useTranslation'
 
 interface Props {
   friend: Friend
@@ -43,7 +44,7 @@ function shouldShowTimestamp(prev: Message | null, curr: Message): boolean {
   return currTime - prevTime >= 30 * 60 * 1000
 }
 
-function formatTimestampLabel(dateStr: string): string {
+function formatTimestampLabel(dateStr: string, todayLabel: string, locale: string): string {
   const date = new Date(dateStr)
   const now = new Date()
   const isToday =
@@ -51,18 +52,14 @@ function formatTimestampLabel(dateStr: string): string {
     date.getMonth() === now.getMonth() &&
     date.getFullYear() === now.getFullYear()
 
-  const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  const timeStr = date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
 
   if (isToday) {
-    return `Today ${timeStr}`
+    return `${todayLabel} ${timeStr}`
   }
 
-  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  const dayName = days[date.getDay()]
-  const day = date.getDate()
-  const month = months[date.getMonth()]
-  return `${dayName} ${day} ${month}, ${timeStr}`
+  const dateLabel = date.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' })
+  return `${dateLabel}, ${timeStr}`
 }
 
 function blobToBase64(blob: Blob): Promise<string> {
@@ -77,6 +74,7 @@ function blobToBase64(blob: Blob): Promise<string> {
 export function ChatPanel({ friend, onBack, mobileBackButton }: Props) {
   const { user } = useAuth()
   const { addLastMessage, clearUnreadCount } = useSocialContext()
+  const { t, lang } = useTranslation()
   const [messages, setMessages] = useState<Message[]>([])
   const [body, setBody] = useState('')
   const [sending, setSending] = useState(false)
@@ -235,13 +233,13 @@ export function ChatPanel({ friend, onBack, mobileBackButton }: Props) {
       <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-0">
         {loading ? (
           <div className="flex items-center justify-center h-full">
-            <p className="text-sm text-muted-foreground">Loading messages…</p>
+            <p className="text-sm text-muted-foreground">{t.social.loadingMessages}</p>
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-2 text-center">
             <FriendAvatar profile={friend.profile} size="lg" />
             <p className="text-sm font-medium">{name}</p>
-            <p className="text-xs text-muted-foreground">No messages yet. Say hi!</p>
+            <p className="text-xs text-muted-foreground">{t.social.noMessages}</p>
           </div>
         ) : (
           messages.map((msg, index) => {
@@ -256,7 +254,7 @@ export function ChatPanel({ friend, onBack, mobileBackButton }: Props) {
                   <div className="flex items-center gap-2 py-2">
                     <div className="flex-1 h-px bg-border" />
                     <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                      {formatTimestampLabel(msg.created_at)}
+                      {formatTimestampLabel(msg.created_at, t.common.today, lang)}
                     </span>
                     <div className="flex-1 h-px bg-border" />
                   </div>
@@ -301,14 +299,14 @@ export function ChatPanel({ friend, onBack, mobileBackButton }: Props) {
             <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-md border bg-destructive/5 border-destructive/30">
               <span className="h-2 w-2 rounded-full bg-destructive animate-pulse" />
               <span className="text-sm text-destructive font-medium">
-                Recording {Math.floor(recordingDuration / 60).toString().padStart(2, '0')}:{(recordingDuration % 60).toString().padStart(2, '0')}
+                {t.social.recording} {Math.floor(recordingDuration / 60).toString().padStart(2, '0')}:{(recordingDuration % 60).toString().padStart(2, '0')}
               </span>
             </div>
             <Button
               size="icon"
               variant="destructive"
               onClick={stopRecording}
-              title="Stop and send"
+              title={t.social.stopAndSend}
             >
               <Square className="h-4 w-4" />
             </Button>
@@ -316,7 +314,7 @@ export function ChatPanel({ friend, onBack, mobileBackButton }: Props) {
         ) : (
           <div className="flex gap-2">
             <Input
-              placeholder="Message…"
+              placeholder={t.social.messagePlaceholder}
               value={body}
               onChange={e => setBody(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
@@ -327,7 +325,7 @@ export function ChatPanel({ friend, onBack, mobileBackButton }: Props) {
               variant="outline"
               onClick={startRecording}
               disabled={sending}
-              title="Record voice message"
+              title={t.social.recordVoice}
             >
               <Mic className="h-4 w-4" />
             </Button>

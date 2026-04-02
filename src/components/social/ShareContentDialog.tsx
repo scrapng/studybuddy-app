@@ -27,7 +27,7 @@ interface Props {
 export function ShareContentDialog({ open, onOpenChange, contentType, title, payload }: Props) {
   const { user } = useAuth()
   const { friends } = useSocialContext()
-  const { t, lang } = useTranslation()
+  const { t } = useTranslation()
   const [recipientId, setRecipientId] = useState('')
   const [groupId, setGroupId] = useState('')
   const [groups, setGroups] = useState<StudyGroup[]>([])
@@ -50,21 +50,21 @@ export function ShareContentDialog({ open, onOpenChange, contentType, title, pay
     const gId = activeTab === 'groups' ? groupId : null
     const ok = await shareContent(user.id, rId, gId, contentType, title, payload)
     if (ok) {
-      toast.success(lang === 'pl' ? 'Treść udostępniona!' : 'Content shared!')
+      toast.success(t.social.shareSuccess)
       onOpenChange(false)
       setRecipientId('')
       setGroupId('')
     } else {
-      toast.error(lang === 'pl' ? 'Nie udało się udostępnić. Spróbuj ponownie.' : 'Failed to share. Try again.')
+      toast.error(t.social.shareFailed)
     }
     setSharing(false)
   }
 
   const contentTypeLabel = contentType === 'note'
-    ? (lang === 'pl' ? 'Notatka' : 'Note')
+    ? t.social.shareNote
     : contentType === 'flashcard_set'
-    ? (lang === 'pl' ? 'Zestaw fiszek' : 'Flashcard Set')
-    : (lang === 'pl' ? 'Zestaw quizów' : 'Quiz Set')
+    ? t.social.shareFlashcardSet
+    : t.social.shareQuizSet
 
   const isShareDisabled = sharing
     || (activeTab === 'friends' && (!recipientId || friends.length === 0))
@@ -76,7 +76,7 @@ export function ShareContentDialog({ open, onOpenChange, contentType, title, pay
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Share2 className="h-5 w-5 text-primary" />
-            {lang === 'pl' ? `Udostępnij ${contentTypeLabel}` : `Share ${contentTypeLabel}`}
+            {`${t.studySet.share} ${contentTypeLabel}`}
           </DialogTitle>
         </DialogHeader>
 
@@ -89,26 +89,24 @@ export function ShareContentDialog({ open, onOpenChange, contentType, title, pay
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full">
               <TabsTrigger value="friends" className="flex-1">
-                {lang === 'pl' ? 'Znajomi' : 'Friends'}
+                {t.social.friends}
               </TabsTrigger>
               <TabsTrigger value="groups" className="flex-1">
-                {lang === 'pl' ? 'Grupy' : 'Groups'}
+                {t.nav.groups}
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="friends" className="mt-3">
               {friends.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-2">
-                  {lang === 'pl'
-                    ? 'Nie masz jeszcze znajomych do udostępnienia.'
-                    : 'You have no friends to share with yet.'}
+                  {t.social.noFriendsToShare}
                 </p>
               ) : (
                 <div className="space-y-1.5">
-                  <Label>{lang === 'pl' ? 'Udostępnij znajomemu' : 'Share with'}</Label>
+                  <Label>{t.social.shareWith}</Label>
                   <Select value={recipientId} onValueChange={(v) => setRecipientId(v ?? '')}>
                     <SelectTrigger>
-                      <SelectValue placeholder={lang === 'pl' ? 'Wybierz znajomego…' : 'Select a friend…'} />
+                      <SelectValue placeholder={t.social.selectFriendPlaceholder} />
                     </SelectTrigger>
                     <SelectContent>
                       {friends.map(f => (
@@ -125,16 +123,14 @@ export function ShareContentDialog({ open, onOpenChange, contentType, title, pay
             <TabsContent value="groups" className="mt-3">
               {groups.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-2">
-                  {lang === 'pl'
-                    ? 'Nie należysz do żadnych grup.'
-                    : 'You are not a member of any groups yet.'}
+                  {t.social.notInGroups}
                 </p>
               ) : (
                 <div className="space-y-1.5">
-                  <Label>{lang === 'pl' ? 'Udostępnij grupie' : 'Share with group'}</Label>
+                  <Label>{t.social.shareWithGroup}</Label>
                   <Select value={groupId} onValueChange={(v) => setGroupId(v ?? '')}>
                     <SelectTrigger>
-                      <SelectValue placeholder={lang === 'pl' ? 'Wybierz grupę…' : 'Select a group…'} />
+                      <SelectValue placeholder={t.social.selectGroupPlaceholder} />
                     </SelectTrigger>
                     <SelectContent>
                       {groups.map(g => (
@@ -159,7 +155,7 @@ export function ShareContentDialog({ open, onOpenChange, contentType, title, pay
             disabled={isShareDisabled}
           >
             <Share2 className="h-4 w-4 mr-2" />
-            {lang === 'pl' ? 'Udostępnij' : 'Share'}
+            {t.studySet.share}
           </Button>
         </DialogFooter>
       </DialogContent>

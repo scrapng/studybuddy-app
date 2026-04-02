@@ -142,8 +142,14 @@ export function SocialProvider({ children }: { children: ReactNode }) {
           } else if (payload.eventType === 'UPDATE') {
             const updated = payload.new as Friendship
             if (updated.status === 'accepted') {
-              // Move from pending to friends
+              // Move from pending to friends (guard against duplicate from optimistic update)
               setState(s => {
+                if (s.friends.some(f => f.friendship_id === updated.id)) {
+                  return {
+                    ...s,
+                    pendingIncoming: s.pendingIncoming.filter(f => f.id !== updated.id),
+                  }
+                }
                 const req = s.pendingIncoming.find(f => f.id === updated.id)
                 const newFriends = req?.requester
                   ? [
@@ -180,6 +186,57 @@ export function SocialProvider({ children }: { children: ReactNode }) {
       .subscribe()
 
     channels.push(friendshipChannel)
+
+    // 1b. Requests I sent — watch for acceptance/rejection
+    const sentChannel = supabase
+      .channel(`social-sent-${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'friendships',
+          filter: `requester_id=eq.${userId}`,
+        },
+        async (payload) => {
+          const updated = payload.new as Friendship
+          if (updated.status === 'accepted') {
+            setState(s => {
+              if (s.friends.some(f => f.friendship_id === updated.id)) {
+                return { ...s, pendingSent: s.pendingSent.filter(f => f.id !== updated.id) }
+              }
+              // Fetch addressee profile to build Friend object
+              return { ...s, pendingSent: s.pendingSent.filter(f => f.id !== updated.id) }
+            })
+            // Fetch the addressee's profile and add to friends list
+            const { data: addresseeProfile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', updated.addressee_id)
+              .single()
+            if (addresseeProfile) {
+              setState(s => {
+                if (s.friends.some(f => f.friendship_id === updated.id)) return s
+                return {
+                  ...s,
+                  friends: [
+                    ...s.friends,
+                    { friendship_id: updated.id, profile: addresseeProfile, since: updated.updated_at },
+                  ],
+                }
+              })
+            }
+          } else if (updated.status === 'rejected') {
+            setState(s => ({
+              ...s,
+              pendingSent: s.pendingSent.filter(f => f.id !== updated.id),
+            }))
+          }
+        }
+      )
+      .subscribe()
+
+    channels.push(sentChannel)
 
     // 2. Notifications
     const notifChannel = supabase

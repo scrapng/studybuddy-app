@@ -17,17 +17,18 @@ export function AIToolsPage() {
   return (
     <div className="space-y-6">
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-purple-500/10 via-violet-500/10 to-fuchsia-500/10 border border-purple-200 dark:border-purple-800/50 p-6 md:p-8 animate-in fade-in duration-500">
-        <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-purple-500/10 blur-3xl" />
-        <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-fuchsia-500/10 blur-3xl" />
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-indigo-500/25 via-purple-500/20 to-fuchsia-500/25 dark:from-purple-500/10 dark:via-violet-500/10 dark:to-fuchsia-500/10 border border-indigo-300/35 dark:border-purple-800/50 backdrop-blur-sm p-6 md:p-8 animate-in fade-in duration-500">
+        <div className="absolute inset-0 bg-gradient-to-br from-white/35 via-transparent to-purple-300/10 dark:from-transparent dark:to-transparent" />
+        <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-indigo-400/15 dark:bg-purple-500/10 blur-3xl" />
+        <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-fuchsia-400/15 dark:bg-fuchsia-500/10 blur-3xl" />
         <div className="relative">
           <div className="flex items-center gap-3 mb-3">
-            <div className="rounded-lg bg-purple-500/20 p-2">
-              <Sparkles className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+            <div className="rounded-lg bg-indigo-500/15 dark:bg-purple-500/20 p-2">
+              <Sparkles className="h-6 w-6 text-indigo-700 dark:text-purple-400" />
             </div>
-            <h1 className="text-2xl font-bold">{t.ai.title}</h1>
+            <h1 className="text-2xl font-bold text-indigo-950 dark:text-foreground">{t.ai.title}</h1>
           </div>
-          <p className="text-muted-foreground max-w-lg">{t.ai.heroDesc}</p>
+          <p className="text-indigo-900/75 dark:text-muted-foreground max-w-lg">{t.ai.heroDesc}</p>
         </div>
       </div>
 

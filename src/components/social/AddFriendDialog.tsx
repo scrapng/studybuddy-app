@@ -10,6 +10,7 @@ import { getProfileByFriendCode, sendFriendRequest } from '@/lib/social-service'
 import { useAuth } from '@/contexts/AuthContext'
 import { useSocialContext } from '@/contexts/SocialContext'
 import { toast } from 'sonner'
+import { useTranslation } from '@/hooks/useTranslation'
 
 interface Props {
   open: boolean
@@ -19,6 +20,7 @@ interface Props {
 export function AddFriendDialog({ open, onOpenChange }: Props) {
   const { user } = useAuth()
   const { profile } = useSocialContext()
+  const { t } = useTranslation()
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -28,7 +30,7 @@ export function AddFriendDialog({ open, onOpenChange }: Props) {
     const trimmed = code.trim().toUpperCase()
 
     if (trimmed === profile?.friend_code) {
-      toast.error("You can't add yourself!")
+      toast.error(t.social.cantAddYourself)
       return
     }
 
@@ -36,7 +38,7 @@ export function AddFriendDialog({ open, onOpenChange }: Props) {
 
     const targetProfile = await getProfileByFriendCode(trimmed)
     if (!targetProfile) {
-      toast.error('No user found with that friend code.')
+      toast.error(t.social.noUserFound)
       setLoading(false)
       return
     }
@@ -44,11 +46,11 @@ export function AddFriendDialog({ open, onOpenChange }: Props) {
     const result = await sendFriendRequest(user.id, targetProfile.id)
 
     if (!result.success) {
-      if (result.error === 'already_friends') toast.error('You are already friends!')
-      else if (result.error === 'request_pending') toast.info('Friend request already sent.')
-      else toast.error('Failed to send request. Try again.')
+      if (result.error === 'already_friends') toast.error(t.social.alreadyFriends)
+      else if (result.error === 'request_pending') toast.info(t.social.requestPending)
+      else toast.error(t.social.requestFailed)
     } else {
-      toast.success(`Friend request sent to ${targetProfile.display_name || trimmed}!`)
+      toast.success(t.social.requestSent.replace('{name}', targetProfile.display_name || trimmed))
       setCode('')
       onOpenChange(false)
     }
@@ -62,26 +64,26 @@ export function AddFriendDialog({ open, onOpenChange }: Props) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus className="h-5 w-5 text-primary" />
-            Add Friend
+            {t.social.addFriend}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <p className="text-sm text-muted-foreground">
-            Enter your friend's 8-character friend code to send them a request.
+            {t.social.addFriendDesc}
           </p>
           {profile && (
             <div className="bg-muted/50 rounded-lg p-3 text-center">
-              <p className="text-xs text-muted-foreground mb-1">Your friend code</p>
+              <p className="text-xs text-muted-foreground mb-1">{t.social.yourFriendCode}</p>
               <p className="font-mono font-bold text-lg tracking-widest text-primary">
                 {profile.friend_code}
               </p>
             </div>
           )}
           <div className="space-y-2">
-            <Label>Friend's Code</Label>
+            <Label>{t.social.friendCode}</Label>
             <Input
-              placeholder="e.g. A1B2C3D4"
+              placeholder={t.social.friendCodePlaceholder}
               value={code}
               onChange={e => setCode(e.target.value.toUpperCase())}
               maxLength={8}
@@ -92,10 +94,10 @@ export function AddFriendDialog({ open, onOpenChange }: Props) {
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t.common.cancel}</Button>
           <Button onClick={handleSubmit} disabled={loading || code.trim().length !== 8}>
             <UserPlus className="h-4 w-4 mr-2" />
-            Send Request
+            {t.social.sendRequest}
           </Button>
         </DialogFooter>
       </DialogContent>

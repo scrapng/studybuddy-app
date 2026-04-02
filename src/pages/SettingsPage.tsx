@@ -187,12 +187,12 @@ export function SettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Users className="h-4 w-4" />
-              Friend Code
+              {t.settings.friendCode}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-3">
-              Share this code with friends so they can add you.
+              {t.settings.friendCodeDesc}
             </p>
             <div className="flex items-center gap-3">
               <div className="flex-1 bg-muted/50 rounded-lg p-3 text-center">
@@ -205,9 +205,9 @@ export function SettingsPage() {
                 size="icon"
                 onClick={() => {
                   navigator.clipboard.writeText(profile.friend_code)
-                  toast.success('Friend code copied!')
+                  toast.success(t.social.friendCodeCopied)
                 }}
-                title="Copy"
+                title={t.common.copy}
               >
                 <Copy className="h-4 w-4" />
               </Button>

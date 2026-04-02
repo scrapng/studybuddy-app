@@ -19,11 +19,13 @@ import {
 } from '@/lib/social-service'
 import { useAuth } from '@/contexts/AuthContext'
 import { toast } from 'sonner'
+import { useTranslation } from '@/hooks/useTranslation'
 import { getRelativeTime } from '@/lib/utils'
 import type { StudyGroup, GroupMember, SharedContent } from '@/types/social'
 
 export function GroupsPage() {
   const { user } = useAuth()
+  const { t } = useTranslation()
   const [groups, setGroups] = useState<StudyGroup[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedGroup, setSelectedGroup] = useState<StudyGroup | null>(null)
@@ -68,9 +70,9 @@ export function GroupsPage() {
       setCreateOpen(false)
       setNewGroupName('')
       setNewGroupDesc('')
-      toast.success('Study group created!')
+      toast.success(t.groups.created)
     } else {
-      toast.error('Failed to create group.')
+      toast.error(t.groups.createFailed)
     }
     setActionLoading(false)
   }
@@ -83,11 +85,11 @@ export function GroupsPage() {
       setGroups(prev => [...prev, result.group!])
       setJoinOpen(false)
       setJoinCode('')
-      toast.success(`Joined "${result.group.name}"!`)
+      toast.success(`${t.groups.joinGroup}: "${result.group.name}"`)
     } else {
-      if (result.error === 'group_not_found') toast.error('No group found with that code.')
-      else if (result.error === 'already_member') toast.error("You're already in this group.")
-      else toast.error('Failed to join group.')
+      if (result.error === 'group_not_found') toast.error(t.groups.notFound)
+      else if (result.error === 'already_member') toast.error(t.groups.alreadyMember)
+      else toast.error(t.groups.joinFailed)
     }
     setActionLoading(false)
   }
@@ -97,14 +99,14 @@ export function GroupsPage() {
     await leaveGroup(group.id, user.id)
     setGroups(prev => prev.filter(g => g.id !== group.id))
     if (selectedGroup?.id === group.id) setSelectedGroup(null)
-    toast.success('Left the group')
+    toast.success(t.groups.left)
   }
 
   async function handleDelete(group: StudyGroup) {
     await deleteGroup(group.id)
     setGroups(prev => prev.filter(g => g.id !== group.id))
     if (selectedGroup?.id === group.id) setSelectedGroup(null)
-    toast.success('Group deleted')
+    toast.success(t.groups.deleted)
   }
 
   const contentTypeIcon = (type: string) => {
@@ -117,17 +119,17 @@ export function GroupsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 animate-in fade-in duration-500">
         <div>
-          <h1 className="text-2xl font-bold">Study Groups</h1>
-          <p className="text-muted-foreground text-sm">Learn together with friends</p>
+          <h1 className="text-2xl font-bold">{t.groups.title}</h1>
+          <p className="text-muted-foreground text-sm">{t.groups.learnTogether}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setJoinOpen(true)} className="gap-2 flex-1 sm:flex-none">
             <Users className="h-4 w-4" />
-            Join Group
+            {t.groups.joinGroup}
           </Button>
           <Button onClick={() => setCreateOpen(true)} className="gap-2 flex-1 sm:flex-none">
             <Plus className="h-4 w-4" />
-            Create Group
+            {t.groups.createGroup}
           </Button>
         </div>
       </div>
@@ -144,8 +146,8 @@ export function GroupsPage() {
               <CardContent className="flex flex-col items-center justify-center py-12 text-center gap-3">
                 <Users className="h-10 w-10 text-muted-foreground/50" />
                 <div>
-                  <p className="font-medium">No groups yet</p>
-                  <p className="text-sm text-muted-foreground mt-1">Create a group or join one with an invite code</p>
+                  <p className="font-medium">{t.groups.noGroups}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{t.groups.noGroupsDesc}</p>
                 </div>
               </CardContent>
             </Card>
@@ -172,7 +174,7 @@ export function GroupsPage() {
                           onClick={e => {
                             e.stopPropagation()
                             navigator.clipboard.writeText(group.invite_code)
-                            toast.success('Invite code copied!')
+                            toast.success(t.groups.inviteCodeCopied)
                           }}
                         >
                           <Copy className="h-3 w-3" />
@@ -186,7 +188,7 @@ export function GroupsPage() {
                           variant="ghost"
                           className="h-7 w-7 text-destructive hover:bg-destructive/10"
                           onClick={e => { e.stopPropagation(); handleDelete(group) }}
-                          title="Delete group"
+                          title={t.groups.deleteGroup}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -196,7 +198,7 @@ export function GroupsPage() {
                           variant="ghost"
                           className="h-7 w-7 text-muted-foreground hover:text-destructive"
                           onClick={e => { e.stopPropagation(); handleLeave(group) }}
-                          title="Leave group"
+                          title={t.groups.leaveGroup}
                         >
                           <LogOut className="h-3.5 w-3.5" />
                         </Button>
@@ -217,7 +219,7 @@ export function GroupsPage() {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base flex items-center gap-2">
                     <Users className="h-4 w-4" />
-                    Members ({members.length})
+                    {t.groups.members} ({members.length})
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
@@ -233,7 +235,7 @@ export function GroupsPage() {
                         {member.profile?.display_name || member.profile?.friend_code || 'Unknown'}
                       </span>
                       {member.role === 'owner' && (
-                        <Badge variant="secondary" className="text-xs">Owner</Badge>
+                        <Badge variant="secondary" className="text-xs">{t.groups.owner}</Badge>
                       )}
                     </div>
                   ))}
@@ -244,12 +246,12 @@ export function GroupsPage() {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base flex items-center gap-2">
                     <BookOpen className="h-4 w-4" />
-                    Shared Content ({sharedContent.length})
+                    {t.groups.sharedContent} ({sharedContent.length})
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {sharedContent.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4">No content shared yet</p>
+                    <p className="text-sm text-muted-foreground text-center py-4">{t.groups.noSharedContent}</p>
                   ) : (
                     <div className="space-y-2">
                       {sharedContent.map(item => (
@@ -272,7 +274,7 @@ export function GroupsPage() {
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12 text-center gap-2">
                 <Users className="h-8 w-8 text-muted-foreground/40" />
-                <p className="text-sm text-muted-foreground">Select a group to see details</p>
+                <p className="text-sm text-muted-foreground">{t.groups.selectGroup}</p>
               </CardContent>
             </Card>
           )}
@@ -283,31 +285,31 @@ export function GroupsPage() {
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Create Study Group</DialogTitle>
+            <DialogTitle>{t.groups.createGroupTitle}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-2">
             <div className="space-y-1.5">
-              <Label>Group Name</Label>
+              <Label>{t.groups.groupName}</Label>
               <Input
-                placeholder="e.g. Math Study Group"
+                placeholder={t.groups.groupNamePlaceholder}
                 value={newGroupName}
                 onChange={e => setNewGroupName(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleCreate()}
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Description (optional)</Label>
+              <Label>{t.groups.descriptionOptional}</Label>
               <Input
-                placeholder="What are you studying?"
+                placeholder={t.groups.descPlaceholder}
                 value={newGroupDesc}
                 onChange={e => setNewGroupDesc(e.target.value)}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setCreateOpen(false)}>{t.common.cancel}</Button>
             <Button onClick={handleCreate} disabled={!newGroupName.trim() || actionLoading}>
-              Create Group
+              {t.groups.createGroup}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -317,14 +319,14 @@ export function GroupsPage() {
       <Dialog open={joinOpen} onOpenChange={setJoinOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Join Study Group</DialogTitle>
+            <DialogTitle>{t.groups.joinGroupTitle}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-2">
-            <p className="text-sm text-muted-foreground">Enter the 8-character invite code to join a group.</p>
+            <p className="text-sm text-muted-foreground">{t.groups.inviteCodeDesc}</p>
             <div className="space-y-1.5">
-              <Label>Invite Code</Label>
+              <Label>{t.groups.inviteCode}</Label>
               <Input
-                placeholder="e.g. AB12CD34"
+                placeholder={t.groups.inviteCodePlaceholder}
                 value={joinCode}
                 onChange={e => setJoinCode(e.target.value.toUpperCase())}
                 className="font-mono tracking-widest text-center text-lg"
@@ -334,9 +336,9 @@ export function GroupsPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setJoinOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setJoinOpen(false)}>{t.common.cancel}</Button>
             <Button onClick={handleJoin} disabled={joinCode.trim().length !== 8 || actionLoading}>
-              Join Group
+              {t.groups.joinGroup}
             </Button>
           </DialogFooter>
         </DialogContent>

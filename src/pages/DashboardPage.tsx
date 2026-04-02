@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { BookOpen, Clock, Flame, Brain, Plus, Play, AlertCircle, Trophy, Sparkles, Camera, Wand2, ArrowRight, HelpCircle } from 'lucide-react'
+import { BookOpen, Clock, Flame, Brain, Plus, Play, AlertCircle, Trophy, Sparkles, Camera, Wand2, ArrowRight, HelpCircle, X } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -24,6 +24,7 @@ export function DashboardPage() {
   const recentSessions = [...sessions].sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()).slice(0, 5)
 
   const [tutorialOpen, setTutorialOpen] = useState(false)
+  const [aiHeroHidden, setAiHeroHidden] = useState(false)
 
   // Show tutorial only once per user (first time a new user opens the app)
   const userId = user?.id
@@ -36,6 +37,23 @@ export function DashboardPage() {
       localStorage.setItem(key, '1')
     }
   }, [userId])
+
+  // Load AI hero hidden preference
+  useEffect(() => {
+    if (!userId) return
+    const hidden = localStorage.getItem(`notebuddy-ai-hero-hidden-${userId}`)
+    setAiHeroHidden(hidden === '1')
+  }, [userId])
+
+  function hideAiHero() {
+    setAiHeroHidden(true)
+    if (userId) localStorage.setItem(`notebuddy-ai-hero-hidden-${userId}`, '1')
+  }
+
+  function showAiHero() {
+    setAiHeroHidden(false)
+    if (userId) localStorage.removeItem(`notebuddy-ai-hero-hidden-${userId}`)
+  }
 
   const dueReview = useMemo(() => {
     return state.studySets
@@ -90,52 +108,69 @@ export function DashboardPage() {
       </div>
 
       {/* AI Hero Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-purple-600 to-fuchsia-600 p-6 md:p-8 animate-in fade-in slide-in-from-top-2 duration-500 shadow-lg">
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/10" />
-        <div className="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-white/5 blur-3xl" />
-        <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-fuchsia-400/10 blur-3xl" />
+      {aiHeroHidden ? (
+        <button
+          onClick={showAiHero}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500/12 to-fuchsia-500/12 dark:from-indigo-600/20 dark:to-fuchsia-600/20 border border-indigo-300/40 dark:border-indigo-500/30 hover:from-indigo-500/20 hover:to-fuchsia-500/20 dark:hover:from-indigo-600/30 dark:hover:to-fuchsia-600/30 backdrop-blur-sm transition-all text-sm font-semibold text-indigo-700 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 animate-in fade-in duration-300"
+        >
+          <Sparkles className="h-4 w-4" />
+          {t.dashboard.aiPoweredTools}
+        </button>
+      ) : (
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-500/22 via-purple-500/18 to-fuchsia-500/22 dark:from-indigo-600 dark:via-purple-600 dark:to-fuchsia-600 p-6 md:p-8 animate-in fade-in slide-in-from-top-2 duration-500 shadow-md border border-indigo-300/30 dark:border-transparent backdrop-blur-sm">
+        <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-purple-300/15 dark:from-white/5 dark:via-transparent dark:to-black/10" />
+        <div className="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-indigo-400/10 dark:bg-white/5 blur-3xl" />
+        <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-fuchsia-400/10 dark:bg-fuchsia-400/10 blur-3xl" />
+        <button
+          onClick={hideAiHero}
+          className="absolute top-3 right-3 z-10 rounded-lg p-1.5 text-indigo-400 dark:text-white/60 hover:text-indigo-700 dark:hover:text-white hover:bg-indigo-200/40 dark:hover:bg-white/10 transition-colors"
+          title="Hide"
+        >
+          <X className="h-4 w-4" />
+        </button>
         <div className="relative">
           <div className="flex items-center gap-3 mb-2">
-            <div className="rounded-xl bg-white/20 p-2 backdrop-blur-sm">
-              <Sparkles className="h-6 w-6 text-white" />
+            <div className="rounded-xl bg-indigo-500/15 dark:bg-white/20 p-2 backdrop-blur-sm">
+              <Sparkles className="h-6 w-6 text-indigo-700 dark:text-white" />
             </div>
-            <h2 className="text-xl md:text-2xl font-bold text-white">{t.dashboard.aiPoweredTools}</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-indigo-900 dark:text-white">{t.dashboard.aiPoweredTools}</h2>
           </div>
-          <p className="text-white/80 text-sm mb-6 max-w-lg">{t.dashboard.aiHeroDesc}</p>
+          <p className="text-indigo-800/60 dark:text-white/80 text-sm mb-6 max-w-lg">{t.dashboard.aiHeroDesc}</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <Link to="/ai-tools" className="group flex items-center gap-4 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 p-4 transition-all hover:scale-[1.02] active:scale-[0.98]">
-              <div className="rounded-lg bg-blue-400/30 p-3 shrink-0 group-hover:bg-blue-400/40 transition-colors">
-                <Camera className="h-6 w-6 text-white" />
+            <Link to="/ai-tools" className="group flex items-center gap-4 rounded-xl bg-white/35 dark:bg-white/10 hover:bg-white/60 dark:hover:bg-white/20 backdrop-blur-sm border border-indigo-200/40 dark:border-white/20 p-4 transition-all hover:scale-[1.02] active:scale-[0.98]">
+              <div className="rounded-lg bg-blue-500/12 dark:bg-blue-400/30 p-3 shrink-0 group-hover:bg-blue-500/20 dark:group-hover:bg-blue-400/40 transition-colors">
+                <Camera className="h-6 w-6 text-blue-700 dark:text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-white font-semibold text-sm">{t.dashboard.scanNotes}</p>
-                <p className="text-white/70 text-xs mt-0.5">{t.dashboard.scanNotesDesc}</p>
+                <p className="text-indigo-900 dark:text-white font-semibold text-sm">{t.dashboard.scanNotes}</p>
+                <p className="text-indigo-600/70 dark:text-white/70 text-xs mt-0.5">{t.dashboard.scanNotesDesc}</p>
               </div>
-              <ArrowRight className="h-4 w-4 text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all shrink-0" />
+              <ArrowRight className="h-4 w-4 text-indigo-400 dark:text-white/60 group-hover:text-indigo-700 dark:group-hover:text-white group-hover:translate-x-1 transition-all shrink-0" />
             </Link>
-            <Link to="/ai-tools" className="group flex items-center gap-4 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 p-4 transition-all hover:scale-[1.02] active:scale-[0.98]">
-              <div className="rounded-lg bg-purple-400/30 p-3 shrink-0 group-hover:bg-purple-400/40 transition-colors">
-                <Wand2 className="h-6 w-6 text-white" />
+            <Link to="/ai-tools" className="group flex items-center gap-4 rounded-xl bg-white/35 dark:bg-white/10 hover:bg-white/60 dark:hover:bg-white/20 backdrop-blur-sm border border-indigo-200/40 dark:border-white/20 p-4 transition-all hover:scale-[1.02] active:scale-[0.98]">
+              <div className="rounded-lg bg-purple-500/12 dark:bg-purple-400/30 p-3 shrink-0 group-hover:bg-purple-500/20 dark:group-hover:bg-purple-400/40 transition-colors">
+                <Wand2 className="h-6 w-6 text-purple-700 dark:text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-white font-semibold text-sm">{t.dashboard.enhance}</p>
-                <p className="text-white/70 text-xs mt-0.5">{t.dashboard.enhanceDesc}</p>
+                <p className="text-indigo-900 dark:text-white font-semibold text-sm">{t.dashboard.enhance}</p>
+                <p className="text-indigo-600/70 dark:text-white/70 text-xs mt-0.5">{t.dashboard.enhanceDesc}</p>
               </div>
-              <ArrowRight className="h-4 w-4 text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all shrink-0" />
+              <ArrowRight className="h-4 w-4 text-indigo-400 dark:text-white/60 group-hover:text-indigo-700 dark:group-hover:text-white group-hover:translate-x-1 transition-all shrink-0" />
             </Link>
-            <Link to="/ai-tools" className="group flex items-center gap-4 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 p-4 transition-all hover:scale-[1.02] active:scale-[0.98]">
-              <div className="rounded-lg bg-green-400/30 p-3 shrink-0 group-hover:bg-green-400/40 transition-colors">
-                <Brain className="h-6 w-6 text-white" />
+            <Link to="/ai-tools" className="group flex items-center gap-4 rounded-xl bg-white/35 dark:bg-white/10 hover:bg-white/60 dark:hover:bg-white/20 backdrop-blur-sm border border-indigo-200/40 dark:border-white/20 p-4 transition-all hover:scale-[1.02] active:scale-[0.98]">
+              <div className="rounded-lg bg-green-500/12 dark:bg-green-400/30 p-3 shrink-0 group-hover:bg-green-500/20 dark:group-hover:bg-green-400/40 transition-colors">
+                <Brain className="h-6 w-6 text-green-700 dark:text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-white font-semibold text-sm">{t.dashboard.generateQuiz}</p>
-                <p className="text-white/70 text-xs mt-0.5">{t.dashboard.generateQuizDesc}</p>
+                <p className="text-indigo-900 dark:text-white font-semibold text-sm">{t.dashboard.generateQuiz}</p>
+                <p className="text-indigo-600/70 dark:text-white/70 text-xs mt-0.5">{t.dashboard.generateQuizDesc}</p>
               </div>
-              <ArrowRight className="h-4 w-4 text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all shrink-0" />
+              <ArrowRight className="h-4 w-4 text-indigo-400 dark:text-white/60 group-hover:text-indigo-700 dark:group-hover:text-white group-hover:translate-x-1 transition-all shrink-0" />
             </Link>
           </div>
         </div>
       </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 stagger-grid">
