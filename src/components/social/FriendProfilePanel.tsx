@@ -10,6 +10,7 @@ import { formatDuration } from '@/lib/utils'
 import { ACHIEVEMENTS, getUnlockedAchievements } from '@/lib/achievements'
 import { toast } from 'sonner'
 import type { Friend } from '@/types/social'
+import { useTranslation } from '@/hooks/useTranslation'
 
 interface FriendStats {
   totalStudyTime: number
@@ -26,6 +27,7 @@ interface Props {
 
 export function FriendProfilePanel({ friend, onChat }: Props) {
   const { removeFriendLocal } = useSocialContext()
+  const { t } = useTranslation()
   const [stats, setStats] = useState<FriendStats | null>(null)
   const [loadingStats, setLoadingStats] = useState(true)
 
@@ -81,7 +83,7 @@ export function FriendProfilePanel({ friend, onChat }: Props) {
   async function handleUnfriend() {
     await unfriend(friend.friendship_id)
     removeFriendLocal(friend.friendship_id)
-    toast.success(`Removed ${friend.profile.display_name || 'friend'}`)
+    toast.success(t.social.removed.replace('{name}', friend.profile.display_name || friend.profile.friend_code))
   }
 
   const name = friend.profile.display_name || friend.profile.friend_code
@@ -101,7 +103,7 @@ export function FriendProfilePanel({ friend, onChat }: Props) {
           <div className="flex gap-2 justify-center">
             <Button onClick={onChat} className="gap-2">
               <MessageCircle className="h-4 w-4" />
-              Message
+              {t.social.message}
             </Button>
             <Button
               variant="outline"
@@ -109,7 +111,7 @@ export function FriendProfilePanel({ friend, onChat }: Props) {
               onClick={handleUnfriend}
             >
               <UserMinus className="h-4 w-4" />
-              Unfriend
+              {t.social.unfriend}
             </Button>
           </div>
         </CardContent>
@@ -118,7 +120,7 @@ export function FriendProfilePanel({ friend, onChat }: Props) {
       {/* Stats */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Study Stats</CardTitle>
+          <CardTitle className="text-sm">{t.social.studyStats}</CardTitle>
         </CardHeader>
         <CardContent>
           {loadingStats ? (
@@ -132,34 +134,34 @@ export function FriendProfilePanel({ friend, onChat }: Props) {
               <div className="bg-muted/50 rounded-lg p-3">
                 <div className="flex items-center gap-1.5 mb-1">
                   <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Study Time</span>
+                  <span className="text-xs text-muted-foreground">{t.social.studyTime}</span>
                 </div>
                 <p className="font-bold">{formatDuration(stats.totalStudyTime)}</p>
               </div>
               <div className="bg-muted/50 rounded-lg p-3">
                 <div className="flex items-center gap-1.5 mb-1">
                   <Flame className="h-3.5 w-3.5 text-orange-500" />
-                  <span className="text-xs text-muted-foreground">Streak</span>
+                  <span className="text-xs text-muted-foreground">{t.social.streak}</span>
                 </div>
-                <p className="font-bold">{stats.streak} days</p>
+                <p className="font-bold">{stats.streak} {t.common.days}</p>
               </div>
               <div className="bg-muted/50 rounded-lg p-3">
                 <div className="flex items-center gap-1.5 mb-1">
                   <Brain className="h-3.5 w-3.5 text-green-500" />
-                  <span className="text-xs text-muted-foreground">Mastered</span>
+                  <span className="text-xs text-muted-foreground">{t.social.mastered}</span>
                 </div>
                 <p className="font-bold">{stats.masteredCards} <span className="text-xs font-normal text-muted-foreground">/ {stats.totalFlashcards}</span></p>
               </div>
               <div className="bg-muted/50 rounded-lg p-3">
                 <div className="flex items-center gap-1.5 mb-1">
                   <Trophy className="h-3.5 w-3.5 text-yellow-500" />
-                  <span className="text-xs text-muted-foreground">Sessions</span>
+                  <span className="text-xs text-muted-foreground">{t.social.sessions}</span>
                 </div>
                 <p className="font-bold">{stats.totalSessions}</p>
               </div>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-4">Stats not available</p>
+            <p className="text-sm text-muted-foreground text-center py-4">{t.social.statsNotAvailable}</p>
           )}
         </CardContent>
       </Card>
@@ -170,7 +172,7 @@ export function FriendProfilePanel({ friend, onChat }: Props) {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <Trophy className="h-4 w-4 text-yellow-500" />
-              Achievements
+              {t.achievements.title}
             </CardTitle>
           </CardHeader>
           <CardContent>

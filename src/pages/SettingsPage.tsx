@@ -15,7 +15,7 @@ import { toast } from 'sonner'
 export function SettingsPage() {
   const { user, signOut } = useAuth()
   const { state, dispatch } = useSubjectsContext()
-  const { profile } = useSocialContext()
+  const { profile, updateDisplayName } = useSocialContext()
   const { t } = useTranslation()
   const navigate = useNavigate()
 
@@ -25,6 +25,8 @@ export function SettingsPage() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [newPassword, setNewPassword] = useState('')
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false)
+  const [displayName, setDisplayName] = useState(profile?.display_name ?? '')
+  const [isUpdatingName, setIsUpdatingName] = useState(false)
 
   const stats = {
     subjects: state.subjects.length,
@@ -33,6 +35,13 @@ export function SettingsPage() {
     notes: state.studySets.reduce((sum, s) => sum + s.notes.length, 0),
     questions: state.studySets.reduce((sum, s) => sum + s.questions.length, 0),
     sessions: state.sessions.length,
+  }
+
+  const handleUpdateDisplayName = async () => {
+    setIsUpdatingName(true)
+    await updateDisplayName(displayName)
+    toast.success(t.settings.displayNameUpdated)
+    setIsUpdatingName(false)
   }
 
   const handleChangePassword = async () => {
@@ -141,18 +150,49 @@ export function SettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Display Name */}
+      {profile && (
+        <Card className="card-hover-lift">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <User className="h-4 w-4" />
+              {t.settings.displayName}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">{t.settings.displayNameDesc}</p>
+            <div className="flex gap-2">
+              <Input
+                value={displayName}
+                onChange={e => setDisplayName(e.target.value)}
+                placeholder={t.settings.displayNamePlaceholder}
+                maxLength={32}
+                className="flex-1"
+              />
+              <Button
+                onClick={handleUpdateDisplayName}
+                disabled={isUpdatingName}
+                size="sm"
+              >
+                {t.common.save}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Friend Code */}
       {profile && (
         <Card className="card-hover-lift">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Users className="h-4 w-4" />
-              Friend Code
+              {t.settings.friendCode}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-3">
-              Share this code with friends so they can add you.
+              {t.settings.friendCodeDesc}
             </p>
             <div className="flex items-center gap-3">
               <div className="flex-1 bg-muted/50 rounded-lg p-3 text-center">
@@ -165,9 +205,9 @@ export function SettingsPage() {
                 size="icon"
                 onClick={() => {
                   navigator.clipboard.writeText(profile.friend_code)
-                  toast.success('Friend code copied!')
+                  toast.success(t.social.friendCodeCopied)
                 }}
-                title="Copy"
+                title={t.common.copy}
               >
                 <Copy className="h-4 w-4" />
               </Button>

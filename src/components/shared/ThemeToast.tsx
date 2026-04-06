@@ -1,4 +1,5 @@
 import { Sun, Moon } from 'lucide-react'
+import { useTranslation } from '@/hooks/useTranslation'
 
 interface ThemeToastProps {
   theme: string
@@ -7,6 +8,7 @@ interface ThemeToastProps {
 
 export function ThemeToast({ theme, visible }: ThemeToastProps) {
   const isDark = theme === 'dark'
+  const { t } = useTranslation()
 
   return (
     <div
@@ -24,7 +26,7 @@ export function ThemeToast({ theme, visible }: ThemeToastProps) {
         )}
       </div>
       <span className="text-sm font-medium">
-        {isDark ? 'Dark mode' : 'Light mode'}
+        {isDark ? t.theme.darkMode : t.theme.lightMode}
       </span>
       <kbd className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-mono">M</kbd>
     </div>

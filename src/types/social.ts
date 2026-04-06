@@ -3,6 +3,7 @@ export interface Profile {
   friend_code: string
   display_name: string | null
   avatar_color: string
+  language: string | null
   created_at: string
 }
 

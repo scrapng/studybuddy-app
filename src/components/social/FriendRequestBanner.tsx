@@ -4,11 +4,13 @@ import { Button } from '@/components/ui/button'
 import { useSocialContext } from '@/contexts/SocialContext'
 import { respondToFriendRequest } from '@/lib/social-service'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTranslation } from '@/hooks/useTranslation'
 import { toast } from 'sonner'
 
 export function FriendRequestBanner() {
   const { pendingIncoming, acceptRequestLocal, rejectRequestLocal } = useSocialContext()
   const { user } = useAuth()
+  const { t } = useTranslation()
   const [responding, setResponding] = useState<string | null>(null)
 
   // Show the most recent unresponded request
@@ -29,7 +31,7 @@ export function FriendRequestBanner() {
       profile: request.requester!,
       since: new Date().toISOString(),
     })
-    toast.success(`You are now friends with ${senderName}!`)
+    toast.success(t.social.nowFriends.replace('{name}', senderName))
     setResponding(null)
   }
 
@@ -49,9 +51,9 @@ export function FriendRequestBanner() {
             <UserPlus className="h-5 w-5 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm">Friend Request</p>
+            <p className="font-semibold text-sm">{t.social.friendRequest}</p>
             <p className="text-xs text-muted-foreground truncate">
-              <span className="font-medium text-foreground">{senderName}</span> wants to be your friend
+              <span className="font-medium text-foreground">{senderName}</span> {t.social.wantsToBeYourFriend}
             </p>
           </div>
         </div>
@@ -63,7 +65,7 @@ export function FriendRequestBanner() {
             disabled={responding === request.id}
           >
             <Check className="h-3.5 w-3.5 mr-1" />
-            Accept
+            {t.social.accept}
           </Button>
           <Button
             size="sm"
@@ -73,12 +75,12 @@ export function FriendRequestBanner() {
             disabled={responding === request.id}
           >
             <X className="h-3.5 w-3.5 mr-1" />
-            Decline
+            {t.social.decline}
           </Button>
         </div>
         {pendingIncoming.length > 1 && (
           <p className="text-xs text-center text-muted-foreground">
-            +{pendingIncoming.length - 1} more request{pendingIncoming.length > 2 ? 's' : ''}
+            {(pendingIncoming.length > 2 ? t.social.moreRequests : t.social.moreRequest).replace('{count}', String(pendingIncoming.length - 1))}
           </p>
         )}
       </div>

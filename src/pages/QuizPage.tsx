@@ -157,9 +157,9 @@ export function QuizPage() {
                   <div className="flex-1">
                     <p className="text-sm font-medium">Q{i + 1}: {r.question.questionText}</p>
                     {!r.isCorrect && r.userAnswer && (
-                      <p className="text-sm text-red-500 mt-1">{t.quiz.yourAnswer}: {r.userAnswer}</p>
+                      <p className="text-sm text-red-500 mt-1">{t.quiz.yourAnswer}: {r.userAnswer === 'True' ? t.quiz.trueOption : r.userAnswer === 'False' ? t.quiz.falseOption : r.userAnswer}</p>
                     )}
-                    <p className="text-sm text-green-600 dark:text-green-400 mt-1">{t.quiz.correctLabel}: {r.question.correctAnswer}</p>
+                    <p className="text-sm text-green-600 dark:text-green-400 mt-1">{t.quiz.correctLabel}: {r.question.correctAnswer === 'True' ? t.quiz.trueOption : r.question.correctAnswer === 'False' ? t.quiz.falseOption : r.question.correctAnswer}</p>
                     {r.question.explanation && (
                       <p className="text-xs text-muted-foreground mt-1">{r.question.explanation}</p>
                     )}
@@ -214,18 +214,21 @@ export function QuizPage() {
 
           {(currentQ.type === 'multiple-choice' || currentQ.type === 'true-false') && (
             <div className="space-y-2">
-              {(currentQ.type === 'true-false' ? ['True', 'False'] : currentQ.options).map(option => (
+              {(currentQ.type === 'true-false'
+                ? [{ value: 'True', label: t.quiz.trueOption }, { value: 'False', label: t.quiz.falseOption }]
+                : currentQ.options.map(o => ({ value: o, label: o }))
+              ).map(({ value, label }) => (
                 <button
-                  key={option}
-                  onClick={() => handleAnswer(option)}
+                  key={value}
+                  onClick={() => handleAnswer(value)}
                   className={cn(
                     'w-full text-left px-4 py-3 rounded-lg border transition-colors',
-                    currentAnswer === option
+                    currentAnswer === value
                       ? 'border-primary bg-primary/5 text-primary'
                       : 'border-border hover:border-primary/50 hover:bg-accent'
                   )}
                 >
-                  {option}
+                  {label}
                 </button>
               ))}
             </div>

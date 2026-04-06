@@ -30,8 +30,8 @@ export function MobileNav() {
 
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: t.nav.dashboard },
-    { to: '/subjects', icon: BookOpen, label: t.nav.subjects },
     { to: '/ai-tools', icon: Sparkles, label: t.nav.aiTools, accent: true },
+    { to: '/subjects', icon: BookOpen, label: t.nav.subjects },
     { to: '/analytics', icon: BarChart3, label: t.nav.analytics },
     { to: '/schedule', icon: Calendar, label: t.nav.schedule },
     { to: '/achievements', icon: Trophy, label: t.nav.achievements },
@@ -41,14 +41,14 @@ export function MobileNav() {
   ]
 
   return (
-    <div className="lg:hidden flex items-center justify-between border-b px-4 py-3 glass-nav sticky top-0 z-50">
+    <div className="lg:hidden flex items-center justify-between border-b px-4 py-4 glass-nav sticky top-0 z-50" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
       <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
         <AppLogo className="h-6 w-6" />
         <span className="font-bold text-lg">{t.app.name}</span>
       </Link>
 
       <div className="flex items-center gap-1">
-        <NotificationsPanel />
+        <NotificationsPanel dropDown />
         <ThemeToggle />
         <LanguageToggle />
         <Sheet open={open} onOpenChange={setOpen}>

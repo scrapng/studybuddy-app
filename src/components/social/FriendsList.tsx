@@ -9,6 +9,7 @@ import { useSocialContext } from '@/contexts/SocialContext'
 import type { Friend } from '@/types/social'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { useTranslation } from '@/hooks/useTranslation'
 
 interface Props {
   selectedFriendId?: string
@@ -17,6 +18,7 @@ interface Props {
 
 export function FriendsList({ selectedFriendId, onSelectFriend }: Props) {
   const { friends, pendingIncoming, unreadMessageCounts, profile } = useSocialContext()
+  const { t } = useTranslation()
   const [addOpen, setAddOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [copied, setCopied] = useState(false)
@@ -24,7 +26,7 @@ export function FriendsList({ selectedFriendId, onSelectFriend }: Props) {
   function copyCode() {
     if (!profile?.friend_code) return
     navigator.clipboard.writeText(profile.friend_code)
-    toast.success('Friend code copied!')
+    toast.success(t.social.friendCodeCopied)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -39,19 +41,19 @@ export function FriendsList({ selectedFriendId, onSelectFriend }: Props) {
       {/* Header */}
       <div className="p-3 border-b space-y-2">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-sm">Friends</h2>
+          <h2 className="font-semibold text-sm">{t.social.friends}</h2>
           <Button size="sm" variant="outline" onClick={() => setAddOpen(true)} className="gap-1.5 h-7 text-xs">
             <UserPlus className="h-3.5 w-3.5" />
-            Add
+            {t.social.add}
           </Button>
         </div>
         {profile && (
           <div className="flex items-center justify-between bg-muted/50 rounded-lg px-3 py-1.5">
             <div>
-              <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Your code</p>
+              <p className="text-[10px] text-muted-foreground leading-none mb-0.5">{t.social.yourCode}</p>
               <p className="font-mono font-bold text-sm tracking-widest text-primary">{profile.friend_code}</p>
             </div>
-            <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0" onClick={copyCode} title="Copy friend code">
+            <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0" onClick={copyCode} title={t.social.copyFriendCode}>
               {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
             </Button>
           </div>
@@ -59,7 +61,7 @@ export function FriendsList({ selectedFriendId, onSelectFriend }: Props) {
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input
-            placeholder="Search friends…"
+            placeholder={t.social.searchFriends}
             className="h-8 pl-8 text-sm"
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -68,7 +70,7 @@ export function FriendsList({ selectedFriendId, onSelectFriend }: Props) {
         {pendingIncoming.length > 0 && (
           <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/20">
             <Badge variant="destructive" className="text-xs h-5">{pendingIncoming.length}</Badge>
-            <span className="text-xs text-muted-foreground">pending request{pendingIncoming.length > 1 ? 's' : ''}</span>
+            <span className="text-xs text-muted-foreground">{pendingIncoming.length > 1 ? t.social.pendingRequests : t.social.pendingRequest}</span>
           </div>
         )}
       </div>
@@ -79,12 +81,12 @@ export function FriendsList({ selectedFriendId, onSelectFriend }: Props) {
           <div className="flex flex-col items-center justify-center h-full gap-3 p-4 text-center">
             <UserPlus className="h-8 w-8 text-muted-foreground/50" />
             <div>
-              <p className="text-sm font-medium">No friends yet</p>
-              <p className="text-xs text-muted-foreground mt-1">Add friends using their friend code</p>
+              <p className="text-sm font-medium">{t.social.noFriendsYet}</p>
+              <p className="text-xs text-muted-foreground mt-1">{t.social.noFriendsDesc}</p>
             </div>
             <Button size="sm" onClick={() => setAddOpen(true)} className="gap-1.5">
               <UserPlus className="h-3.5 w-3.5" />
-              Add Friend
+              {t.social.addFriend}
             </Button>
           </div>
         ) : (
@@ -114,7 +116,7 @@ export function FriendsList({ selectedFriendId, onSelectFriend }: Props) {
                       variant="ghost"
                       className="h-7 w-7"
                       onClick={e => { e.stopPropagation(); onSelectFriend(friend, 'chat') }}
-                      title="Message"
+                      title={t.social.message}
                     >
                       <MessageCircle className="h-3.5 w-3.5" />
                     </Button>
@@ -123,7 +125,7 @@ export function FriendsList({ selectedFriendId, onSelectFriend }: Props) {
                       variant="ghost"
                       className="h-7 w-7"
                       onClick={e => { e.stopPropagation(); onSelectFriend(friend, 'profile') }}
-                      title="Profile"
+                      title={t.nav.social}
                     >
                       <User className="h-3.5 w-3.5" />
                     </Button>

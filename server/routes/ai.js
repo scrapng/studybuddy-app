@@ -3,80 +3,90 @@ import OpenAI from 'openai'
 
 const router = express.Router()
 
-const MODEL = 'gpt-4o-mini'
-const VISION_MODEL = 'gpt-4o'
+const MODEL = 'gpt-5.4-nano-2026-03-17'        // text tasks (fast, cheap)
+const VISION_MODEL = 'gpt-5.4-mini-2026-03-17'  // vision tasks (supports images)
 
-// Lazy-load OpenAI client - don't instantiate until environment is ready
+// Lazy-load OpenAI client
 let openai = null
-
-function getOpenAIClient() {
+function getClient() {
   if (!openai) {
-    openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    })
+    openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   }
   return openai
 }
 
 // Language names for prompts
-const LANGUAGE_NAMES = {
-  en: 'English',
-  pl: 'Polish',
-}
+const LANGUAGE_NAMES = { en: 'English', pl: 'Polish' }
 
-// Common foreign language keywords that indicate a language-learning subject
-const FOREIGN_LANGUAGE_KEYWORDS = [
-  // English
+// Foreign language subject detection keywords
+const FOREIGN_LANG_KW = [
   'english', 'angielski', 'język angielski',
-  // German
   'german', 'niemiecki', 'język niemiecki', 'deutsch',
-  // French
-  'french', 'francuski', 'język francuski', 'français',
-  // Spanish
-  'spanish', 'hiszpański', 'język hiszpański', 'español',
-  // Italian
-  'italian', 'włoski', 'język włoski', 'italiano',
-  // Russian
+  'french', 'francuski', 'język francuski',
+  'spanish', 'hiszpański', 'język hiszpański',
+  'italian', 'włoski', 'język włoski',
   'russian', 'rosyjski', 'język rosyjski',
-  // Japanese
   'japanese', 'japoński', 'język japoński',
-  // Chinese
   'chinese', 'chiński', 'język chiński',
-  // Korean
   'korean', 'koreański', 'język koreański',
-  // Portuguese
   'portuguese', 'portugalski', 'język portugalski',
-  // Latin
   'latin', 'łaciński', 'łacina',
 ]
 
-/**
- * Determines the language instruction for AI prompts based on user language and subject.
- * If the subject is a foreign language, adapts the prompt for language learning context.
- */
-function getLanguageInstruction(language, subjectName) {
+function getLangInstruction(language, subjectName) {
   const langName = LANGUAGE_NAMES[language] || 'English'
-
   if (!subjectName) {
-    if (language === 'en') return '' // Default behavior for English
-    return `IMPORTANT: Respond entirely in ${langName}. All text, explanations, and content must be in ${langName}.`
+    return language === 'en' ? '' : `IMPORTANT: Respond entirely in ${langName}. All text must be in ${langName}.`
   }
-
-  const subjectLower = subjectName.toLowerCase().trim()
-  const isForeignLanguageSubject = FOREIGN_LANGUAGE_KEYWORDS.some(kw => subjectLower.includes(kw))
-
-  if (isForeignLanguageSubject) {
+  const sub = subjectName.toLowerCase()
+  if (FOREIGN_LANG_KW.some(kw => sub.includes(kw))) {
     if (language === 'en') {
-      return `This is a foreign language learning subject ("${subjectName}"). Generate content appropriate for someone learning this language. Include the target language terms with English explanations where appropriate.`
+      return `This is a foreign language learning subject ("${subjectName}"). Include target language terms with English explanations.`
     }
-    return `This is a foreign language learning subject ("${subjectName}"). The student's native language is ${langName}. Generate content in ${langName} but include the target foreign language terms, vocabulary, and expressions that the student is learning. Explanations and instructions should be in ${langName}, while the learning material (vocabulary, example sentences) should be in the target language with ${langName} translations.`
+    return `This is a foreign language learning subject ("${subjectName}"). Student's native language: ${langName}. Write explanations in ${langName}, vocabulary/examples in the target language with ${langName} translations.`
   }
-
-  if (language === 'en') return '' // Default behavior for English
-  return `IMPORTANT: Respond entirely in ${langName}. All text, explanations, and content must be in ${langName}.`
+  return language === 'en' ? '' : `IMPORTANT: Respond entirely in ${langName}. All text must be in ${langName}.`
 }
 
-// Validate API key is configured
+/**
+ * Call OpenAI Chat Completions for text-only tasks.
+ * Uses proven chat completions format for reliability.
+ */
+async function callText(systemPrompt, userPrompt, maxTokens = 4096) {
+  const messages = []
+  if (systemPrompt) messages.push({ role: 'system', content: systemPrompt })
+  messages.push({ role: 'user', content: userPrompt })
+
+  const response = await getClient().chat.completions.create({
+    model: MODEL,
+    messages,
+    max_completion_tokens: maxTokens,
+  })
+  return response.choices[0]?.message?.content || ''
+}
+
+/**
+ * Call OpenAI Chat Completions for vision (image + text) tasks.
+ * Uses a vision-capable model (mini, not nano — nano is text-only).
+ */
+async function callVision(imageUrl, textPrompt, maxTokens = 2048) {
+  const response = await getClient().chat.completions.create({
+    model: VISION_MODEL,
+    messages: [
+      {
+        role: 'user',
+        content: [
+          { type: 'image_url', image_url: { url: imageUrl, detail: 'high' } },
+          { type: 'text', text: textPrompt },
+        ],
+      },
+    ],
+    max_completion_tokens: maxTokens,
+  })
+  return response.choices[0]?.message?.content || ''
+}
+
+// Validate API key middleware
 router.use((req, res, next) => {
   if (!process.env.OPENAI_API_KEY) {
     return res.status(503).json({ error: 'OpenAI API key not configured' })
@@ -84,271 +94,212 @@ router.use((req, res, next) => {
   next()
 })
 
-// OCR: Extract text from image using GPT-4o Vision
+// ---------------------------------------------------------------------------
+// Debug endpoint — test model connectivity (remove in production if desired)
+// ---------------------------------------------------------------------------
+router.get('/test', async (req, res) => {
+  const results = {}
+  try {
+    results.text = await callText(null, 'Say "OK" and nothing else.')
+    results.textModel = MODEL
+    results.textOk = true
+  } catch (err) {
+    results.textOk = false
+    results.textModel = MODEL
+    results.textError = err?.message
+  }
+  res.json(results)
+})
+
+// ---------------------------------------------------------------------------
+// OCR: Extract text from image
+// ---------------------------------------------------------------------------
 router.post('/ocr', async (req, res) => {
   try {
     const { imageData, language, subjectName } = req.body
+    if (!imageData) return res.status(400).json({ error: 'imageData required' })
 
-    if (!imageData) {
-      return res.status(400).json({ error: 'imageData required' })
-    }
-
-    // Ensure the image data is a proper data URL for OpenAI
     const imageUrl = imageData.startsWith('data:')
       ? imageData
       : `data:image/jpeg;base64,${imageData}`
 
-    const langInstruction = getLanguageInstruction(language, subjectName)
-    const langNote = langInstruction ? `\n\n${langInstruction}` : ''
+    const langNote = getLangInstruction(language, subjectName)
+    const prompt = [
+      'Extract ALL visible text from this image of handwritten or printed notes.',
+      'Preserve structure, headings, bullet points, and numbering.',
+      'If no text is visible in the image, respond with an empty string.',
+      'If handwriting is unclear, make your best interpretation.',
+      'Return ONLY the extracted text — no commentary, no extra explanation.',
+      langNote,
+    ].filter(Boolean).join('\n')
 
-    const response = await getOpenAIClient().chat.completions.create({
-      model: VISION_MODEL,
-      max_tokens: 4096,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'image_url',
-              image_url: {
-                url: imageUrl,
-                detail: 'high'
-              }
-            },
-            {
-              type: 'text',
-              text: `Please extract ALL text from this image of handwritten or printed notes. Preserve the original structure, headings, bullet points, and formatting as much as possible. If the handwriting is unclear, make your best interpretation. Return ONLY the extracted text, no explanations or commentary.${langNote}`
-            }
-          ]
-        }
-      ]
-    })
-
-    const text = response.choices[0]?.message?.content || ''
-
-    res.json({
-      text,
-      success: true
-    })
-  } catch (error) {
-    console.error('OCR error:', error.message || error)
-    res.status(500).json({
-      error: 'Failed to process image',
-      success: false,
-      message: error.message
-    })
+    const text = await callVision(imageUrl, prompt)
+    res.json({ text, success: true })
+  } catch (err) {
+    console.error('OCR error:', err?.message ?? err)
+    res.status(500).json({ error: 'Failed to process image', message: err?.message, success: false })
   }
 })
 
+// ---------------------------------------------------------------------------
 // Enhance OCR text: Clean up raw OCR output
+// ---------------------------------------------------------------------------
 router.post('/enhance-ocr-text', async (req, res) => {
   try {
     const { text, language, subjectName } = req.body
+    if (!text) return res.status(400).json({ error: 'text required' })
 
-    if (!text) {
-      return res.status(400).json({ error: 'text required' })
-    }
+    const langNote = getLangInstruction(language, subjectName)
+    const system = [
+      'You are a text cleanup assistant.',
+      'Fix OCR errors, typos, and formatting while preserving the original meaning.',
+      langNote,
+    ].filter(Boolean).join(' ')
 
-    const langInstruction = getLanguageInstruction(language, subjectName)
-    const systemPrompt = `You are a text cleanup assistant. Fix OCR errors, typos, and formatting issues while preserving the original meaning and structure.${langInstruction ? ' ' + langInstruction : ''}`
-
-    const response = await getOpenAIClient().chat.completions.create({
-      model: MODEL,
-      max_tokens: 4096,
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt
-        },
-        {
-          role: 'user',
-          content: `This is raw OCR text that may have errors. Please clean it up, fix typos, and make it readable. Return only the cleaned text:\n\n${text}`
-        }
-      ]
-    })
-
-    const cleanedText = response.choices[0]?.message?.content || ''
-
-    res.json({
-      text: cleanedText,
-      success: true
-    })
-  } catch (error) {
-    console.error('Enhance OCR error:', error.message || error)
-    res.status(500).json({
-      error: 'Failed to enhance text',
-      success: false,
-      message: error.message
-    })
+    const cleaned = await callText(
+      system,
+      `Clean up this raw OCR text, fix typos, and make it readable. Return only the cleaned text:\n\n${text}`
+    )
+    res.json({ text: cleaned, success: true })
+  } catch (err) {
+    console.error('Enhance OCR error:', err?.message ?? err)
+    res.status(500).json({ error: 'Failed to enhance text', message: err?.message, success: false })
   }
 })
 
-// Enhance notes: Apply various enhancement modes
+// ---------------------------------------------------------------------------
+// Enhance notes
+// ---------------------------------------------------------------------------
 router.post('/enhance-notes', async (req, res) => {
   try {
     const { content, mode, language, subjectName } = req.body
+    if (!content || !mode) return res.status(400).json({ error: 'content and mode required' })
 
-    if (!content || !mode) {
-      return res.status(400).json({ error: 'content and mode required' })
+    const modeInstructions = {
+      simplify:        'Simplify this text while keeping all important information. Make it easier to understand.',
+      detailed:        'Expand on this text with more detail and explanation. Add helpful context.',
+      'bullet-points': 'Convert this text into a clear, structured bullet-point list.',
+      eli5:            'Explain this text as if teaching a 5-year-old. Use simple words and clear analogies.',
+      'exam-prep':     'Format this as exam preparation notes: key terms, definitions, important concepts.',
     }
+    const modePrompt = modeInstructions[mode] || modeInstructions.simplify
+    const langNote = getLangInstruction(language, subjectName)
 
-    const modePrompts = {
-      simplify: 'Simplify this text while keeping all important information. Make it easier to understand.',
-      detailed: 'Expand on this text with more detail and explanation. Add helpful context.',
-      'bullet-points': 'Convert this text into a clear bullet-point list. Use bullets for each key idea.',
-      eli5: 'Explain this text as if teaching it to a 5-year-old. Use simple words and clear explanations.',
-      'exam-prep': 'Format this text as exam preparation notes. Include key terms, definitions, and important concepts.'
-    }
+    const system = [
+      'You are a helpful study assistant that enhances study notes.',
+      modePrompt,
+      langNote,
+    ].filter(Boolean).join('\n')
 
-    const prompt = modePrompts[mode] || modePrompts.simplify
-    const langInstruction = getLanguageInstruction(language, subjectName)
-
-    const response = await getOpenAIClient().chat.completions.create({
-      model: MODEL,
-      max_tokens: 4096,
-      messages: [
-        {
-          role: 'system',
-          content: `You are a helpful study assistant. Your task is to enhance study notes. ${prompt}${langInstruction ? '\n\n' + langInstruction : ''}`
-        },
-        {
-          role: 'user',
-          content: `Please enhance the following notes:\n\n${content}`
-        }
-      ]
-    })
-
-    const enhanced = response.choices[0]?.message?.content || ''
-
-    res.json({
-      enhanced,
-      success: true
-    })
-  } catch (error) {
-    console.error('Enhance notes error:', error.message || error)
-    res.status(500).json({
-      error: 'Failed to enhance notes',
-      success: false,
-      message: error.message
-    })
+    const enhanced = await callText(system, `Enhance these notes:\n\n${content}`)
+    res.json({ enhanced, success: true })
+  } catch (err) {
+    console.error('Enhance notes error:', err?.message ?? err)
+    res.status(500).json({ error: 'Failed to enhance notes', message: err?.message, success: false })
   }
 })
 
+// ---------------------------------------------------------------------------
 // Generate quiz questions from notes
+// ---------------------------------------------------------------------------
 router.post('/generate-quiz', async (req, res) => {
   try {
     const { notes, count = 5, language, subjectName } = req.body
+    if (!notes?.length) return res.status(400).json({ error: 'notes array required' })
 
-    if (!notes || !Array.isArray(notes) || notes.length === 0) {
-      return res.status(400).json({ error: 'notes array required' })
-    }
+    const notesText = Array.isArray(notes) ? notes.join('\n\n') : notes
+    const n = Math.min(parseInt(count) || 5, 20)
+    const langNote = getLangInstruction(language, subjectName)
 
-    const notesText = notes.join('\n\n')
-    const numQuestions = Math.min(parseInt(count) || 5, 20)
-    const langInstruction = getLanguageInstruction(language, subjectName)
+    const system = [
+      'You are a quiz generator. Generate quiz questions from study notes.',
+      'Always return ONLY valid JSON — no markdown fences, no extra text.',
+      langNote,
+    ].filter(Boolean).join('\n')
 
-    const response = await getOpenAIClient().chat.completions.create({
-      model: MODEL,
-      max_tokens: 4096,
-      messages: [
-        {
-          role: 'system',
-          content: `You are a quiz generator. Generate quiz questions from study notes. Always return valid JSON arrays.${langInstruction ? '\n\n' + langInstruction : ''}`
-        },
-        {
-          role: 'user',
-          content: `Based on these study notes, generate ${numQuestions} quiz questions. Return them as a JSON array with this structure: [{"type": "multiple-choice" or "true-false" or "short-answer", "question": "...", "options": ["A", "B", "C", "D"] (for multiple-choice only), "answer": "..."}]
+    const userPrompt = `Generate ${n} quiz questions from the notes below as a JSON array.
 
-Study notes:
+STRICT RULES:
+- "multiple-choice": "options" array with exactly 4 plain text choices (no A/B/C/D letters). "answer" must exactly match one option.
+- "true-false": NO "options" field. "answer" must be exactly "True" or "False".
+- "short-answer": NO "options" field. "answer" is brief text.
+- NEVER add options to a true-false question.
+
+JSON format:
+[{"type":"multiple-choice"|"true-false"|"short-answer","question":"...","options":[...] (mc only),"answer":"...","explanation":"..."}]
+
+Notes:
 ${notesText}
 
-Return ONLY valid JSON, no markdown or extra text.`
-        }
-      ]
-    })
+Return ONLY the JSON array.`
 
-    const responseText = response.choices[0]?.message?.content || '[]'
+    const raw = await callText(system, userPrompt, 4096)
 
-    // Parse the JSON response
     let questions = []
     try {
-      // Try to extract JSON from the response
-      const jsonMatch = responseText.match(/\[[\s\S]*\]/)
-      questions = jsonMatch ? JSON.parse(jsonMatch[0]) : []
+      const m = raw.match(/\[[\s\S]*\]/)
+      questions = m ? JSON.parse(m[0]) : []
     } catch {
-      console.warn('Failed to parse quiz questions JSON, returning empty array')
+      console.warn('Quiz JSON parse failed:', raw.slice(0, 300))
     }
 
-    res.json({
-      questions,
-      success: true
+    // Enforce: true-false answers must not have options
+    questions = questions.map(q => {
+      const ans = (q.answer || '').trim()
+      if (ans === 'True' || ans === 'False' || q.type === 'true-false') {
+        return { ...q, type: 'true-false', options: undefined }
+      }
+      return q
     })
-  } catch (error) {
-    console.error('Generate quiz error:', error.message || error)
-    res.status(500).json({
-      error: 'Failed to generate quiz',
-      success: false,
-      message: error.message
-    })
+
+    res.json({ questions, success: true })
+  } catch (err) {
+    console.error('Generate quiz error:', err?.message ?? err)
+    res.status(500).json({ error: 'Failed to generate quiz', message: err?.message, success: false })
   }
 })
 
+// ---------------------------------------------------------------------------
 // Generate flashcards from notes
+// ---------------------------------------------------------------------------
 router.post('/generate-flashcards', async (req, res) => {
   try {
     const { notes, count = 5, language, subjectName } = req.body
+    if (!notes?.length) return res.status(400).json({ error: 'notes array required' })
 
-    if (!notes || !Array.isArray(notes) || notes.length === 0) {
-      return res.status(400).json({ error: 'notes array required' })
-    }
+    const notesText = Array.isArray(notes) ? notes.join('\n\n') : notes
+    const n = Math.min(parseInt(count) || 5, 20)
+    const langNote = getLangInstruction(language, subjectName)
 
-    const notesText = notes.join('\n\n')
-    const numFlashcards = Math.min(parseInt(count) || 5, 20)
-    const langInstruction = getLanguageInstruction(language, subjectName)
+    const system = [
+      'You are a flashcard generator. Create study flashcards from notes.',
+      'Always return ONLY valid JSON — no markdown fences, no extra text.',
+      langNote,
+    ].filter(Boolean).join('\n')
 
-    const response = await getOpenAIClient().chat.completions.create({
-      model: MODEL,
-      max_tokens: 4096,
-      messages: [
-        {
-          role: 'system',
-          content: `You are a flashcard generator. Create study flashcards from notes. Always return valid JSON arrays.${langInstruction ? '\n\n' + langInstruction : ''}`
-        },
-        {
-          role: 'user',
-          content: `Based on these study notes, generate ${numFlashcards} flashcard pairs. Return them as a JSON array with this structure: [{"front": "question/concept", "back": "answer/definition"}, ...]
+    const userPrompt = `Generate ${n} flashcard pairs from the notes below as a JSON array.
 
-Study notes:
+JSON format: [{"front":"question or concept","back":"answer or definition"}]
+
+Notes:
 ${notesText}
 
-Return ONLY valid JSON, no markdown or extra text.`
-        }
-      ]
-    })
+Return ONLY the JSON array.`
 
-    const responseText = response.choices[0]?.message?.content || '[]'
+    const raw = await callText(system, userPrompt, 4096)
 
-    // Parse the JSON response
     let flashcards = []
     try {
-      // Try to extract JSON from the response
-      const jsonMatch = responseText.match(/\[[\s\S]*\]/)
-      flashcards = jsonMatch ? JSON.parse(jsonMatch[0]) : []
+      const m = raw.match(/\[[\s\S]*\]/)
+      flashcards = m ? JSON.parse(m[0]) : []
     } catch {
-      console.warn('Failed to parse flashcards JSON, returning empty array')
+      console.warn('Flashcard JSON parse failed:', raw.slice(0, 300))
     }
 
-    res.json({
-      flashcards,
-      success: true
-    })
-  } catch (error) {
-    console.error('Generate flashcards error:', error.message || error)
-    res.status(500).json({
-      error: 'Failed to generate flashcards',
-      success: false,
-      message: error.message
-    })
+    res.json({ flashcards, success: true })
+  } catch (err) {
+    console.error('Generate flashcards error:', err?.message ?? err)
+    res.status(500).json({ error: 'Failed to generate flashcards', message: err?.message, success: false })
   }
 })
 
