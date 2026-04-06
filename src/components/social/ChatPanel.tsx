@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, type ReactNode } from 'react'
 import { Send, ArrowLeft, Mic, Square } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { FriendAvatar } from './FriendAvatar'
 import { VoiceMessageBubble } from './VoiceMessageBubble'
 import { getMessages, sendMessage, markMessagesRead } from '@/lib/social-service'
@@ -80,6 +80,7 @@ export function ChatPanel({ friend, onBack, mobileBackButton }: Props) {
   const [sending, setSending] = useState(false)
   const [loading, setLoading] = useState(true)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
 
   // Voice recording state
@@ -156,6 +157,7 @@ export function ChatPanel({ friend, onBack, mobileBackButton }: Props) {
       setMessages(prev => [...prev, msg])
       addLastMessage(friend.profile.id, msg)
       setBody('')
+      if (textareaRef.current) textareaRef.current.style.height = 'auto'
     }
     setSending(false)
   }
@@ -312,13 +314,19 @@ export function ChatPanel({ friend, onBack, mobileBackButton }: Props) {
             </Button>
           </div>
         ) : (
-          <div className="flex gap-2">
-            <Input
+          <div className="flex gap-2 items-end">
+            <Textarea
+              ref={textareaRef}
               placeholder={t.social.messagePlaceholder}
               value={body}
-              onChange={e => setBody(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
-              className="flex-1"
+              rows={1}
+              onChange={e => {
+                setBody(e.target.value)
+                e.target.style.height = 'auto'
+                e.target.style.height = Math.min(e.target.scrollHeight, 5 * 24 + 16) + 'px'
+              }}
+              onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
+              className="flex-1 min-h-[38px] max-h-[136px] resize-none py-2 leading-6"
             />
             <Button
               size="icon"

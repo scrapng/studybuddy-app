@@ -73,6 +73,11 @@ export function SocialProvider({ children }: { children: ReactNode }) {
 
     const userId = user.id
 
+    // Request browser notification permission once
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission()
+    }
+
     async function init() {
       let [profile, friends, pendingIncoming, pendingSent, notifications] = await Promise.all([
         getOrCreateProfile(userId),
@@ -252,6 +257,16 @@ export function SocialProvider({ children }: { children: ReactNode }) {
         (payload) => {
           const n = payload.new as Notification
           setState(s => ({ ...s, notifications: [n, ...s.notifications] }))
+          if (
+            'Notification' in window &&
+            Notification.permission === 'granted' &&
+            document.visibilityState === 'hidden'
+          ) {
+            new Notification(n.title, {
+              body: n.body ?? undefined,
+              icon: '/favicon.ico',
+            })
+          }
         }
       )
       .subscribe()
