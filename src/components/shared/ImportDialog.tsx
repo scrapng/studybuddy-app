@@ -75,7 +75,7 @@ export function ImportDialog({ open, onOpenChange, subjectId, setId }: ImportDia
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Import Data</DialogTitle>
         </DialogHeader>

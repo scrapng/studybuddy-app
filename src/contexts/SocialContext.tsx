@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useSettingsContext } from '@/contexts/SettingsContext'
 import { supabase } from '@/lib/supabase'
 import {
   getOrCreateProfile,
@@ -7,6 +8,7 @@ import {
   getPendingRequests,
   getSentRequests,
   getNotifications,
+  updateDisplayName as updateDisplayNameService,
 } from '@/lib/social-service'
 import type { Profile, Friend, Friendship, Notification, Message } from '@/types/social'
 
@@ -35,6 +37,7 @@ interface SocialContextValue extends SocialState {
   removeFriendLocal: (friendshipId: string) => void
   addLastMessage: (friendId: string, msg: Message) => void
   clearUnreadCount: (friendId: string) => void
+  updateDisplayName: (name: string) => Promise<void>
 }
 
 const SocialContext = createContext<SocialContextValue | null>(null)
@@ -47,6 +50,7 @@ export function useSocialContext(): SocialContextValue {
 
 export function SocialProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
+  const { setLanguage } = useSettingsContext()
   const [state, setState] = useState<SocialState>({
     profile: null,
     friends: [],
@@ -69,14 +73,33 @@ export function SocialProvider({ children }: { children: ReactNode }) {
 
     const userId = user.id
 
+    // Request browser notification permission once
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission()
+    }
+
     async function init() {
-      const [profile, friends, pendingIncoming, pendingSent, notifications] = await Promise.all([
+      let [profile, friends, pendingIncoming, pendingSent, notifications] = await Promise.all([
         getOrCreateProfile(userId),
         getFriends(userId),
         getPendingRequests(userId),
         getSentRequests(userId),
         getNotifications(userId),
       ])
+
+      // Apply saved language preference from profile
+      if (profile?.language) {
+        setLanguage(profile.language as import('@/lib/i18n').Language)
+      }
+
+      // If profile has no display_name but user signed up with one, save it now
+      if (profile && !profile.display_name) {
+        const metaName = user?.user_metadata?.display_name as string | undefined
+        if (metaName?.trim()) {
+          await updateDisplayNameService(userId, metaName.trim())
+          profile = { ...profile, display_name: metaName.trim() }
+        }
+      }
 
       setState(s => ({
         ...s,
@@ -124,8 +147,14 @@ export function SocialProvider({ children }: { children: ReactNode }) {
           } else if (payload.eventType === 'UPDATE') {
             const updated = payload.new as Friendship
             if (updated.status === 'accepted') {
-              // Move from pending to friends
+              // Move from pending to friends (guard against duplicate from optimistic update)
               setState(s => {
+                if (s.friends.some(f => f.friendship_id === updated.id)) {
+                  return {
+                    ...s,
+                    pendingIncoming: s.pendingIncoming.filter(f => f.id !== updated.id),
+                  }
+                }
                 const req = s.pendingIncoming.find(f => f.id === updated.id)
                 const newFriends = req?.requester
                   ? [
@@ -163,6 +192,57 @@ export function SocialProvider({ children }: { children: ReactNode }) {
 
     channels.push(friendshipChannel)
 
+    // 1b. Requests I sent — watch for acceptance/rejection
+    const sentChannel = supabase
+      .channel(`social-sent-${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'friendships',
+          filter: `requester_id=eq.${userId}`,
+        },
+        async (payload) => {
+          const updated = payload.new as Friendship
+          if (updated.status === 'accepted') {
+            setState(s => {
+              if (s.friends.some(f => f.friendship_id === updated.id)) {
+                return { ...s, pendingSent: s.pendingSent.filter(f => f.id !== updated.id) }
+              }
+              // Fetch addressee profile to build Friend object
+              return { ...s, pendingSent: s.pendingSent.filter(f => f.id !== updated.id) }
+            })
+            // Fetch the addressee's profile and add to friends list
+            const { data: addresseeProfile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', updated.addressee_id)
+              .single()
+            if (addresseeProfile) {
+              setState(s => {
+                if (s.friends.some(f => f.friendship_id === updated.id)) return s
+                return {
+                  ...s,
+                  friends: [
+                    ...s.friends,
+                    { friendship_id: updated.id, profile: addresseeProfile, since: updated.updated_at },
+                  ],
+                }
+              })
+            }
+          } else if (updated.status === 'rejected') {
+            setState(s => ({
+              ...s,
+              pendingSent: s.pendingSent.filter(f => f.id !== updated.id),
+            }))
+          }
+        }
+      )
+      .subscribe()
+
+    channels.push(sentChannel)
+
     // 2. Notifications
     const notifChannel = supabase
       .channel(`social-notifications-${userId}`)
@@ -177,6 +257,16 @@ export function SocialProvider({ children }: { children: ReactNode }) {
         (payload) => {
           const n = payload.new as Notification
           setState(s => ({ ...s, notifications: [n, ...s.notifications] }))
+          if (
+            'Notification' in window &&
+            Notification.permission === 'granted' &&
+            document.visibilityState === 'hidden'
+          ) {
+            new Notification(n.title, {
+              body: n.body ?? undefined,
+              icon: '/favicon.ico',
+            })
+          }
         }
       )
       .subscribe()
@@ -278,6 +368,12 @@ export function SocialProvider({ children }: { children: ReactNode }) {
     }))
   }
 
+  async function updateDisplayName(name: string) {
+    if (!state.profile) return
+    await updateDisplayNameService(state.profile.id, name)
+    setState(s => s.profile ? { ...s, profile: { ...s.profile!, display_name: name.trim() || null } } : s)
+  }
+
   async function refreshFriends() {
     if (!user?.id) return
     const [friends, pendingIncoming, pendingSent] = await Promise.all([
@@ -310,6 +406,7 @@ export function SocialProvider({ children }: { children: ReactNode }) {
         removeFriendLocal,
         addLastMessage,
         clearUnreadCount,
+        updateDisplayName,
       }}
     >
       {children}

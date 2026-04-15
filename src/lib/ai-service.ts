@@ -101,7 +101,7 @@ export async function enhanceNotes(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}))
-    throw new Error(error.error || 'Failed to enhance notes')
+    throw new Error(error.message || error.error || `Failed to enhance notes (${response.status})`)
   }
 
   const data = await response.json()
@@ -137,7 +137,7 @@ export async function generateQuizFromNotes(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}))
-    throw new Error(error.error || 'Failed to generate quiz')
+    throw new Error(error.message || error.error || `Failed to generate quiz (${response.status})`)
   }
 
   const data = await response.json()
@@ -175,7 +175,7 @@ export async function generateFlashcardsFromNotes(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}))
-    throw new Error(error.error || 'Failed to generate flashcards')
+    throw new Error(error.message || error.error || `Failed to generate flashcards (${response.status})`)
   }
 
   const data = await response.json()

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Play, Pencil, Trash2, FileQuestion, Download, Upload, Zap, Sparkles, Camera, Brain } from 'lucide-react'
+import { ArrowLeft, Play, Pencil, Trash2, FileQuestion, Download, Upload, Zap, Sparkles, Camera, Brain, Share2, MoreHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
@@ -14,11 +14,13 @@ import { GoalList } from '@/components/goals/GoalList'
 import { ImportDialog } from '@/components/shared/ImportDialog'
 import { PhotoNoteUpload } from '@/components/notes/PhotoNoteUpload'
 import { AIQuizGenerateDialog } from '@/components/notes/AIQuizGenerateDialog'
+import { ShareContentDialog } from '@/components/social/ShareContentDialog'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import { useSubjects } from '@/hooks/useSubjects'
 import { useStudySets } from '@/hooks/useStudySets'
@@ -42,6 +44,7 @@ export function StudySetPage() {
   const [importOpen, setImportOpen] = useState(false)
   const [photoOpen, setPhotoOpen] = useState(false)
   const [aiQuizOpen, setAiQuizOpen] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
 
   if (!studySet || !subject) {
     return (
@@ -74,7 +77,8 @@ export function StudySetPage() {
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* AI dropdown — always visible */}
           <DropdownMenu>
             <DropdownMenuTrigger render={
               <Button variant="outline" className="bg-purple-500/10 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 hover:bg-purple-500/20">
@@ -95,6 +99,8 @@ export function StudySetPage() {
               )}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* Primary actions */}
           {studySet.flashcards.length > 0 && (
             <Button onClick={() => navigate(`/study/${studySet.id}`)}>
               <Play className="mr-2 h-4 w-4" />
@@ -113,22 +119,45 @@ export function StudySetPage() {
               {t.studySet.challenge}
             </Button>
           )}
-          <Button variant="outline" size="icon" onClick={() => {
-            const json = exportStudySetAsJSON(studySet)
-            downloadJSON(json, `${studySet.name.toLowerCase().replace(/\s+/g, '-')}.json`)
-            toast.success(t.studySet.setExported)
-          }}>
-            <Download className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="icon" onClick={() => setImportOpen(true)}>
-            <Upload className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="icon" onClick={() => setFormOpen(true)}>
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="icon" onClick={() => setDeleteOpen(true)}>
-            <Trash2 className="h-4 w-4" />
-          </Button>
+
+          {/* Secondary actions in a "More" dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger render={
+              <Button variant="ghost" size="icon" title={t.studySet.more}>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            } />
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setShareOpen(true)}>
+                <Share2 className="mr-2 h-4 w-4" />
+                {t.studySet.share}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                const json = exportStudySetAsJSON(studySet)
+                downloadJSON(json, `${studySet.name.toLowerCase().replace(/\s+/g, '-')}.json`)
+                toast.success(t.studySet.setExported)
+              }}>
+                <Download className="mr-2 h-4 w-4" />
+                {t.studySet.export}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setImportOpen(true)}>
+                <Upload className="mr-2 h-4 w-4" />
+                {t.studySet.import}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setFormOpen(true)}>
+                <Pencil className="mr-2 h-4 w-4" />
+                {t.studySet.editSet}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setDeleteOpen(true)}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                {t.studySet.deleteSet}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -204,6 +233,14 @@ export function StudySetPage() {
         onOpenChange={setAiQuizOpen}
         setId={studySet.id}
         notes={studySet.notes}
+      />
+
+      <ShareContentDialog
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        contentType="flashcard_set"
+        title={studySet.name}
+        payload={{ setId: studySet.id }}
       />
     </div>
   )
