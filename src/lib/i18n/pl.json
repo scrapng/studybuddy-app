@@ -532,6 +532,13 @@
   },
   "settings": {
     "title": "Ustawienia",
+    "appearance": "Wygląd",
+    "colorTheme": "Motyw kolorystyczny",
+    "fontSize": "Rozmiar czcionki",
+    "fontSizeSm": "Mały",
+    "fontSizeMd": "Średni",
+    "fontSizeLg": "Duży",
+    "themeMode": "Tryb motywu",
     "profile": "Profil",
     "emailVerified": "E-mail zweryfikowany",
     "joined": "Dołączono",

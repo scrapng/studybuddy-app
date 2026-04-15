@@ -532,6 +532,13 @@
   },
   "settings": {
     "title": "Settings",
+    "appearance": "Appearance",
+    "colorTheme": "Color Theme",
+    "fontSize": "Font Size",
+    "fontSizeSm": "Small",
+    "fontSizeMd": "Medium",
+    "fontSizeLg": "Large",
+    "themeMode": "Theme Mode",
     "profile": "Profile",
     "emailVerified": "Email verified",
     "joined": "Joined",

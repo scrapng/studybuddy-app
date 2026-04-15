@@ -114,8 +114,13 @@ export interface ActiveQuizSession {
   showFeedback: boolean
 }
 
+export type ColorTheme = 'slate' | 'indigo' | 'violet' | 'rose' | 'amber' | 'emerald' | 'sky'
+export type FontSize = 'sm' | 'md' | 'lg'
+
 export interface AppSettings {
   theme: 'light' | 'dark' | 'system'
   language: 'en' | 'pl'
   sidebarCollapsed: boolean
+  colorTheme: ColorTheme
+  fontSize: FontSize
 }

@@ -11,6 +11,7 @@ import { useSocialContext } from '@/contexts/SocialContext'
 import { useTranslation } from '@/hooks/useTranslation'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
+import { AppearanceCard } from '@/components/settings/AppearanceCard'
 
 export function SettingsPage() {
   const { user, signOut } = useAuth()
@@ -117,6 +118,9 @@ export function SettingsPage() {
   return (
     <div className="space-y-6 max-w-2xl">
       <h1 className="text-2xl font-bold animate-in fade-in duration-500">{t.settings.title}</h1>
+
+      {/* Appearance */}
+      <AppearanceCard />
 
       {/* Profile Info */}
       <Card className="card-hover-lift">
