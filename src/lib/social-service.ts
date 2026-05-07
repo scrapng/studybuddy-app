@@ -43,6 +43,15 @@ export async function getOrCreateProfile(userId: string): Promise<Profile | null
   return inserted as Profile
 }
 
+export async function updateDisplayName(userId: string, displayName: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('profiles')
+    .update({ display_name: displayName.trim() || null })
+    .eq('id', userId)
+  if (error) { console.error('Error updating display name:', error.message); return false }
+  return true
+}
+
 export async function getProfileByFriendCode(code: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from('profiles')
@@ -168,10 +177,12 @@ export async function sendFriendRequest(
   if (error) return { success: false, error: error.message }
 
   // Create notification for addressee
+  const requesterProfile = await getProfileById(requesterId)
+  const requesterName = requesterProfile?.display_name || requesterProfile?.friend_code || 'Someone'
   await insertNotification(addresseeId, {
     type: 'friend_request',
     title: 'New friend request',
-    body: 'Someone wants to be your friend!',
+    body: `${requesterName} wants to be your friend!`,
     ref_id: requesterId,
     ref_type: 'profile',
   })
@@ -191,10 +202,12 @@ export async function respondToFriendRequest(
     .eq('id', friendshipId)
 
   if (status === 'accepted') {
+    const accepterProfile = await getProfileById(currentUserId)
+    const accepterName = accepterProfile?.display_name || accepterProfile?.friend_code || 'Someone'
     await insertNotification(requesterId, {
       type: 'friend_accepted',
       title: 'Friend request accepted!',
-      body: 'Your friend request was accepted.',
+      body: `${accepterName} accepted your friend request.`,
       ref_id: currentUserId,
       ref_type: 'profile',
     })
@@ -244,9 +257,11 @@ export async function sendMessage(
   }
 
   // Create notification
+  const senderProfile = await getProfileById(senderId)
+  const senderName = senderProfile?.display_name || senderProfile?.friend_code || 'Someone'
   await insertNotification(recipientId, {
     type: 'message',
-    title: 'New message',
+    title: `New message from ${senderName}`,
     body: body.length > 60 ? body.slice(0, 60) + '…' : body,
     ref_id: senderId,
     ref_type: 'profile',
@@ -437,9 +452,11 @@ export async function shareContent(
 
   // Notify recipient
   if (recipientId) {
+    const sharerProfile = await getProfileById(senderId)
+    const sharerName = sharerProfile?.display_name || sharerProfile?.friend_code || 'Someone'
     await insertNotification(recipientId, {
       type: 'content_shared',
-      title: `Shared with you: ${title}`,
+      title: `${sharerName} shared "${title}" with you`,
       body: `A ${contentType.replace('_', ' ')} was shared with you.`,
       ref_id: senderId,
       ref_type: 'profile',

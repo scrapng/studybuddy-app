@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import { ArrowLeft } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { useTranslation } from '@/hooks/useTranslation'
 import { FriendsList } from '@/components/social/FriendsList'
 import { FriendProfilePanel } from '@/components/social/FriendProfilePanel'
 import { ChatPanel } from '@/components/social/ChatPanel'
@@ -8,23 +11,34 @@ type View = 'profile' | 'chat'
 
 export function SocialPage() {
   const [selected, setSelected] = useState<{ friend: Friend; view: View } | null>(null)
+  const { t } = useTranslation()
 
   function handleSelect(friend: Friend, view: View) {
     setSelected({ friend, view })
   }
 
+  function handleBack() {
+    setSelected(null)
+  }
+
   return (
     <div className="h-full flex rounded-xl border overflow-hidden" style={{ minHeight: 'calc(100vh - 10rem)' }}>
-      {/* Left panel: friends list */}
-      <div className="w-64 shrink-0 flex flex-col">
+      {/* Left panel: friends list — hidden on mobile when a friend is selected */}
+      <div className={`
+        w-full md:w-64 md:flex shrink-0 flex-col bg-white/30 dark:bg-card/40 backdrop-blur-md
+        ${selected ? 'hidden md:flex' : 'flex'}
+      `}>
         <FriendsList
           selectedFriendId={selected?.friend.profile.id}
           onSelectFriend={handleSelect}
         />
       </div>
 
-      {/* Right panel */}
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* Right panel — full width on mobile, flex-1 on desktop */}
+      <div className={`
+        flex-1 flex flex-col min-w-0 bg-white/65 dark:bg-card/70 backdrop-blur-md
+        ${selected ? 'flex' : 'hidden md:flex'}
+      `}>
         {!selected ? (
           <div className="flex flex-col items-center justify-center h-full gap-4 text-center p-8">
             <div className="rounded-full bg-primary/10 p-6">
@@ -33,9 +47,9 @@ export function SocialPage() {
               </svg>
             </div>
             <div>
-              <h2 className="text-lg font-semibold">Select a friend</h2>
+              <h2 className="text-lg font-semibold">{t.social.selectFriend}</h2>
               <p className="text-sm text-muted-foreground mt-1">
-                Choose a friend from the list to view their profile or start chatting
+                {t.social.selectFriendDesc}
               </p>
             </div>
           </div>
@@ -43,9 +57,21 @@ export function SocialPage() {
           <ChatPanel
             friend={selected.friend}
             onBack={() => setSelected(s => s ? { ...s, view: 'profile' } : null)}
+            mobileBackButton={
+              <Button variant="ghost" size="icon" className="md:hidden h-8 w-8" onClick={handleBack}>
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            }
           />
         ) : (
           <div className="p-4 overflow-y-auto flex-1">
+            {/* Mobile back button */}
+            <div className="flex items-center gap-2 mb-4 md:hidden">
+              <Button variant="ghost" size="sm" onClick={handleBack} className="gap-1.5">
+                <ArrowLeft className="h-4 w-4" />
+                {t.common.back}
+              </Button>
+            </div>
             <FriendProfilePanel
               friend={selected.friend}
               onChat={() => setSelected(s => s ? { ...s, view: 'chat' } : null)}

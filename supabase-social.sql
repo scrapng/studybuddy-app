@@ -1,6 +1,7 @@
 -- ============================================================
 -- SOCIAL FEATURES MIGRATION
 -- Run this in Supabase SQL Editor (Dashboard → SQL Editor → New Query)
+-- This migration is safe to run multiple times (idempotent)
 -- ============================================================
 
 -- Helper: auto-update updated_at column
@@ -18,13 +19,23 @@ $$ LANGUAGE plpgsql;
 -- ============================================================
 CREATE TABLE IF NOT EXISTS profiles (
   id           UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  friend_code  CHAR(8) NOT NULL UNIQUE,
+  friend_code  TEXT NOT NULL UNIQUE,
   display_name TEXT,
   avatar_color TEXT NOT NULL DEFAULT '#6366f1',
+  language     TEXT,
   created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Add language column if upgrading from older schema
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS language TEXT;
+
+-- Drop and recreate RLS if it exists
+ALTER TABLE profiles DISABLE ROW LEVEL SECURITY;
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Profiles readable by authenticated users" ON profiles;
+DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 
 CREATE POLICY "Profiles readable by authenticated users"
   ON profiles FOR SELECT USING (auth.uid() IS NOT NULL);
@@ -36,22 +47,27 @@ CREATE POLICY "Users can update own profile"
   ON profiles FOR UPDATE USING (auth.uid() = id);
 
 -- Auto-create profile with unique friend code on new user signup
+-- Drop function with CASCADE to automatically drop dependent trigger
+DROP FUNCTION IF EXISTS create_profile_on_signup() CASCADE;
 CREATE OR REPLACE FUNCTION create_profile_on_signup()
 RETURNS TRIGGER AS $$
-DECLARE code CHAR(8);
+DECLARE
+  code TEXT;
 BEGIN
   LOOP
     code := upper(substring(md5(random()::text || clock_timestamp()::text) FROM 1 FOR 8));
-    EXIT WHEN NOT EXISTS (SELECT 1 FROM profiles WHERE friend_code = code);
+    EXIT WHEN NOT EXISTS (SELECT 1 FROM public.profiles WHERE friend_code = code);
   END LOOP;
-  INSERT INTO profiles (id, friend_code)
+  INSERT INTO public.profiles (id, friend_code)
   VALUES (NEW.id, code)
   ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
+EXCEPTION WHEN OTHERS THEN
+  -- Never block signup even if profile creation fails
+  RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION create_profile_on_signup();
@@ -81,8 +97,14 @@ CREATE TABLE IF NOT EXISTS friendships (
   CHECK (requester_id <> addressee_id)
 );
 
+ALTER TABLE friendships DISABLE ROW LEVEL SECURITY;
 ALTER TABLE friendships ENABLE ROW LEVEL SECURITY;
 ALTER TABLE friendships REPLICA IDENTITY FULL;
+
+DROP POLICY IF EXISTS "Users can view their own friendships" ON friendships;
+DROP POLICY IF EXISTS "Users can send friend requests" ON friendships;
+DROP POLICY IF EXISTS "Users can update their own friendships" ON friendships;
+DROP POLICY IF EXISTS "Users can delete their own friendships" ON friendships;
 
 CREATE POLICY "Users can view their own friendships"
   ON friendships FOR SELECT
@@ -99,6 +121,7 @@ CREATE POLICY "Users can delete their own friendships"
   ON friendships FOR DELETE
   USING (auth.uid() = requester_id OR auth.uid() = addressee_id);
 
+DROP TRIGGER IF EXISTS friendships_updated_at ON friendships;
 CREATE TRIGGER friendships_updated_at
   BEFORE UPDATE ON friendships
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
@@ -112,11 +135,17 @@ CREATE TABLE IF NOT EXISTS study_groups (
   name        TEXT NOT NULL,
   description TEXT,
   owner_id    UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  invite_code CHAR(8) NOT NULL UNIQUE,
+  invite_code TEXT NOT NULL UNIQUE,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+ALTER TABLE study_groups DISABLE ROW LEVEL SECURITY;
 ALTER TABLE study_groups ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Authenticated users can create groups" ON study_groups;
+DROP POLICY IF EXISTS "Owner can update group" ON study_groups;
+DROP POLICY IF EXISTS "Owner can delete group" ON study_groups;
+DROP POLICY IF EXISTS "Group members can view their groups" ON study_groups;
 
 CREATE POLICY "Authenticated users can create groups"
   ON study_groups FOR INSERT WITH CHECK (auth.uid() = owner_id);
@@ -139,31 +168,48 @@ CREATE TABLE IF NOT EXISTS group_members (
   PRIMARY KEY (group_id, user_id)
 );
 
+ALTER TABLE group_members DISABLE ROW LEVEL SECURITY;
 ALTER TABLE group_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE group_members REPLICA IDENTITY FULL;
 
+DROP POLICY IF EXISTS "Members can view group members" ON group_members;
+DROP POLICY IF EXISTS "Users can join groups" ON group_members;
+DROP POLICY IF EXISTS "Members can leave or be removed" ON group_members;
+
+-- Security definer helpers — bypass RLS to avoid infinite recursion
+DROP FUNCTION IF EXISTS public.is_group_member(UUID) CASCADE;
+CREATE OR REPLACE FUNCTION public.is_group_member(_group_id UUID)
+RETURNS BOOLEAN LANGUAGE SQL SECURITY DEFINER SET search_path = public AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM group_members WHERE group_id = _group_id AND user_id = auth.uid()
+  );
+$$;
+
+DROP FUNCTION IF EXISTS public.is_group_owner(UUID) CASCADE;
+CREATE OR REPLACE FUNCTION public.is_group_owner(_group_id UUID)
+RETURNS BOOLEAN LANGUAGE SQL SECURITY DEFINER SET search_path = public AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM group_members WHERE group_id = _group_id AND user_id = auth.uid() AND role = 'owner'
+  );
+$$;
+
 CREATE POLICY "Members can view group members"
   ON group_members FOR SELECT
-  USING (auth.uid() IN (SELECT user_id FROM group_members gm WHERE gm.group_id = group_id));
+  USING (is_group_member(group_id));
 
 CREATE POLICY "Users can join groups"
   ON group_members FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "Members can leave or be removed"
   ON group_members FOR DELETE
-  USING (
-    auth.uid() = user_id OR
-    auth.uid() IN (SELECT user_id FROM group_members WHERE group_id = group_members.group_id AND role = 'owner')
-  );
+  USING (auth.uid() = user_id OR is_group_owner(group_id));
 
 
 -- Add group view policy for study_groups (after group_members exists)
+-- Uses is_group_member() security definer to avoid RLS recursion
 CREATE POLICY "Group members can view their groups"
   ON study_groups FOR SELECT
-  USING (
-    auth.uid() = owner_id OR
-    auth.uid() IN (SELECT user_id FROM group_members WHERE group_id = id)
-  );
+  USING (auth.uid() = owner_id OR is_group_member(id));
 
 
 -- ============================================================
@@ -184,14 +230,19 @@ CREATE TABLE IF NOT EXISTS shared_content (
   )
 );
 
+ALTER TABLE shared_content DISABLE ROW LEVEL SECURITY;
 ALTER TABLE shared_content ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view relevant shared content" ON shared_content;
+DROP POLICY IF EXISTS "Users can send content" ON shared_content;
+DROP POLICY IF EXISTS "Sender can delete shared content" ON shared_content;
 
 CREATE POLICY "Users can view relevant shared content"
   ON shared_content FOR SELECT
   USING (
     auth.uid() = sender_id OR
     auth.uid() = recipient_id OR
-    auth.uid() IN (SELECT user_id FROM group_members WHERE group_id = shared_content.group_id)
+    is_group_member(shared_content.group_id)
   );
 
 CREATE POLICY "Users can send content"
@@ -214,8 +265,14 @@ CREATE TABLE IF NOT EXISTS messages (
   CHECK (sender_id <> recipient_id)
 );
 
+ALTER TABLE messages DISABLE ROW LEVEL SECURITY;
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE messages REPLICA IDENTITY FULL;
+
+DROP POLICY IF EXISTS "Users can view their own messages" ON messages;
+DROP POLICY IF EXISTS "Users can send messages to friends" ON messages;
+DROP POLICY IF EXISTS "Recipient can mark messages as read" ON messages;
+DROP POLICY IF EXISTS "Sender can delete messages" ON messages;
 
 CREATE POLICY "Users can view their own messages"
   ON messages FOR SELECT
@@ -259,8 +316,14 @@ CREATE TABLE IF NOT EXISTS notifications (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+ALTER TABLE notifications DISABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications REPLICA IDENTITY FULL;
+
+DROP POLICY IF EXISTS "Users can view their own notifications" ON notifications;
+DROP POLICY IF EXISTS "Any authenticated user can insert notifications" ON notifications;
+DROP POLICY IF EXISTS "Users can update own notifications" ON notifications;
+DROP POLICY IF EXISTS "Users can delete own notifications" ON notifications;
 
 CREATE POLICY "Users can view their own notifications"
   ON notifications FOR SELECT USING (auth.uid() = user_id);
@@ -277,9 +340,7 @@ CREATE POLICY "Users can delete own notifications"
 
 -- ============================================================
 -- Enable Realtime on social tables
+-- (Enable via Supabase Dashboard → Replication if needed)
 -- ============================================================
-ALTER PUBLICATION supabase_realtime ADD TABLE friendships;
-ALTER PUBLICATION supabase_realtime ADD TABLE messages;
-ALTER PUBLICATION supabase_realtime ADD TABLE notifications;
-ALTER PUBLICATION supabase_realtime ADD TABLE group_members;
-ALTER PUBLICATION supabase_realtime ADD TABLE shared_content;
+-- Note: Realtime can be enabled in Supabase Dashboard → Database → Replication
+-- Tables are created with REPLICA IDENTITY FULL for realtime support

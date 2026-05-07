@@ -24,17 +24,20 @@ if (!process.env.OPENAI_API_KEY) {
   console.warn('⚠️  WARNING: OPENAI_API_KEY not set. AI features will not work.')
 }
 
-// Security middleware
-app.use(helmet())
+// CORS must be configured BEFORE helmet (helmet can strip CORS headers)
+// We use wildcard origin — security is handled by JWT auth, not origin checks.
+// Authorization header-based auth doesn't require credentials:true (that's for cookies).
+const corsOptions = {
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}
+app.options('*', cors(corsOptions))  // handle preflight first
+app.use(cors(corsOptions))
 
-// CORS configuration
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
-  : ['http://localhost:5173', 'http://localhost:4173']
-
-app.use(cors({
-  origin: isDev ? true : allowedOrigins,
-  credentials: true,
+// Security middleware (after CORS so it doesn't strip CORS headers)
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
 }))
 
 app.use(express.json({ limit: '50mb' }))
@@ -53,6 +56,32 @@ const aiLimiter = rateLimit({
 // Health check endpoint (public)
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'NoteBuddy API Server running' })
+})
+
+// POST routing test (public, no auth) — helps diagnose 405 issues
+app.post('/api/ai/test-post', (req, res) => {
+  res.json({ ok: true, method: req.method, body: req.body })
+})
+
+// AI model connectivity test (public, no auth required)
+app.get('/api/ai/test', async (req, res) => {
+  if (!process.env.OPENAI_API_KEY) {
+    return res.status(503).json({ ok: false, error: 'OPENAI_API_KEY not set on server' })
+  }
+  try {
+    const { default: OpenAI } = await import('openai')
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+    const response = await client.chat.completions.create({
+      model: 'gpt-5.4-nano-2026-03-17',
+      messages: [{ role: 'user', content: 'Say "OK" and nothing else.' }],
+      max_completion_tokens: 10,
+    })
+    const text = response.choices[0]?.message?.content || ''
+    res.json({ ok: true, textModel: 'gpt-5.4-nano-2026-03-17', response: text })
+  } catch (err) {
+    console.error('AI test error:', err?.message)
+    res.status(500).json({ ok: false, textModel: 'gpt-5.4-nano-2026-03-17', error: err?.message })
+  }
 })
 
 // AI routes (protected + rate limited)
