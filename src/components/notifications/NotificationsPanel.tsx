@@ -40,6 +40,7 @@ export function NotificationsPanel({ dropUp = false, dropDown = false }: { dropU
     unreadNotificationCount,
     markNotificationReadLocal,
     markAllNotificationsReadLocal,
+    removeNotificationLocal,
   } = useSocialContext()
   const [open, setOpen] = useState(false)
   const [fixedPos, setFixedPos] = useState({ bottom: 0, left: 0, top: 0 })
@@ -81,7 +82,7 @@ export function NotificationsPanel({ dropUp = false, dropDown = false }: { dropU
 
   async function handleDelete(n: Notification, e: React.MouseEvent) {
     e.stopPropagation()
-    markNotificationReadLocal(n.id)
+    removeNotificationLocal(n.id)
     await deleteNotification(n.id)
   }
 

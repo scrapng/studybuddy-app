@@ -31,6 +31,7 @@ interface SocialContextValue extends SocialState {
   addNotification: (n: Notification) => void
   markNotificationReadLocal: (id: string) => void
   markAllNotificationsReadLocal: () => void
+  removeNotificationLocal: (id: string) => void
   addPendingRequest: (f: Friendship) => void
   acceptRequestLocal: (friendshipId: string, friend: Friend) => void
   rejectRequestLocal: (friendshipId: string) => void
@@ -243,7 +244,7 @@ export function SocialProvider({ children }: { children: ReactNode }) {
 
     channels.push(sentChannel)
 
-    // 2. Notifications
+    // 2. Notifications (INSERT + UPDATE + DELETE)
     const notifChannel = supabase
       .channel(`social-notifications-${userId}`)
       .on(
@@ -256,7 +257,12 @@ export function SocialProvider({ children }: { children: ReactNode }) {
         },
         (payload) => {
           const n = payload.new as Notification
-          setState(s => ({ ...s, notifications: [n, ...s.notifications] }))
+          setState(s => ({
+            ...s,
+            notifications: s.notifications.some(x => x.id === n.id)
+              ? s.notifications
+              : [n, ...s.notifications],
+          }))
           if (
             'Notification' in window &&
             Notification.permission === 'granted' &&
@@ -267,6 +273,38 @@ export function SocialProvider({ children }: { children: ReactNode }) {
               icon: '/favicon.ico',
             })
           }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          const updated = payload.new as Notification
+          setState(s => ({
+            ...s,
+            notifications: s.notifications.map(n => n.id === updated.id ? updated : n),
+          }))
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          const deleted = payload.old as { id: string }
+          setState(s => ({
+            ...s,
+            notifications: s.notifications.filter(n => n.id !== deleted.id),
+          }))
         }
       )
       .subscribe()
@@ -325,6 +363,13 @@ export function SocialProvider({ children }: { children: ReactNode }) {
     setState(s => ({
       ...s,
       notifications: s.notifications.map(n => ({ ...n, read: true })),
+    }))
+  }
+
+  function removeNotificationLocal(id: string) {
+    setState(s => ({
+      ...s,
+      notifications: s.notifications.filter(n => n.id !== id),
     }))
   }
 
@@ -400,6 +445,7 @@ export function SocialProvider({ children }: { children: ReactNode }) {
         addNotification,
         markNotificationReadLocal,
         markAllNotificationsReadLocal,
+        removeNotificationLocal,
         addPendingRequest,
         acceptRequestLocal,
         rejectRequestLocal,
