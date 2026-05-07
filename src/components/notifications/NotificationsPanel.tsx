@@ -32,7 +32,7 @@ function getNavTarget(n: Notification): string | null {
   return null
 }
 
-export function NotificationsPanel({ dropUp = false, dropDown = false }: { dropUp?: boolean; dropDown?: boolean }) {
+export function NotificationsPanel({ dropUp = false }: { dropUp?: boolean }) {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const {
