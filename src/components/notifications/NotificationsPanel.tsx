@@ -44,17 +44,15 @@ export function NotificationsPanel({ dropUp = false, dropDown = false }: { dropU
   } = useSocialContext()
   const [open, setOpen] = useState(false)
   const [fixedPos, setFixedPos] = useState({ bottom: 0, left: 0, top: 0 })
-  const containerRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
 
   function handleToggle() {
     if (!open && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect()
       if (dropUp) {
-        // Sidebar: open upward
         setFixedPos({ bottom: window.innerHeight - rect.top + 4, left: rect.left, top: 0 })
       } else {
-        // Mobile top nav or desktop: open downward, clamped to screen edge
         const left = Math.min(rect.left, window.innerWidth - 320 - 8)
         setFixedPos({ bottom: 0, left: Math.max(8, left), top: rect.bottom + 4 })
       }
@@ -62,16 +60,19 @@ export function NotificationsPanel({ dropUp = false, dropDown = false }: { dropU
     setOpen(v => !v)
   }
 
-  // Close on click outside
+  // Close on click outside — must check BOTH the trigger button AND the portal panel
   useEffect(() => {
     if (!open) return
-    function handleClick(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+    function handleMouseDown(e: MouseEvent) {
+      const target = e.target as Node
+      const insideButton = buttonRef.current?.contains(target)
+      const insidePanel  = panelRef.current?.contains(target)
+      if (!insideButton && !insidePanel) {
         setOpen(false)
       }
     }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
+    document.addEventListener('mousedown', handleMouseDown)
+    return () => document.removeEventListener('mousedown', handleMouseDown)
   }, [open])
 
   async function handleMarkRead(n: Notification, e: React.MouseEvent) {
@@ -105,7 +106,7 @@ export function NotificationsPanel({ dropUp = false, dropDown = false }: { dropU
   }
 
   return (
-    <div ref={containerRef} className="relative">
+    <div className="relative">
       <Button
         ref={buttonRef}
         variant="ghost"
@@ -123,11 +124,10 @@ export function NotificationsPanel({ dropUp = false, dropDown = false }: { dropU
 
       {open && createPortal(
         <div
+          ref={panelRef}
           className="w-80 max-h-[480px] flex flex-col bg-card border rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200"
           style={dropUp
             ? { position: 'fixed', bottom: fixedPos.bottom, left: fixedPos.left, zIndex: 9999 }
-            : dropDown
-            ? { position: 'fixed', top: fixedPos.top, left: fixedPos.left, zIndex: 9999 }
             : { position: 'fixed', top: fixedPos.top, left: fixedPos.left, zIndex: 9999 }
           }
         >
